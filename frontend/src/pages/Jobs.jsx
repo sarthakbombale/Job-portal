@@ -67,7 +67,7 @@ function Jobs() {
           ) : (
             jobs.map((job) => (
               <div className="col-md-4" key={job._id}>
-                <div className="card mb-4 border-dark shadow-none" style={{ borderRadius: "0px" }}>
+                <div className="card mb-4 border-dark shadow-none" style={{ borderRadius: "10px" }}>
                   <div className="card-body">
                     <h5 className="fw-bold text-uppercase">{job.title}</h5>
                     <p className="small text-muted">{job.description}</p>
@@ -79,7 +79,7 @@ function Jobs() {
                         }`}
                       onClick={() => !job.isApplied && apply(job._id)}
                       style={{
-                        borderRadius: "0px",
+                        borderRadius: "5px",
                         cursor: job.isApplied ? "not-allowed" : "pointer",
                         pointerEvents: job.isApplied ? "auto" : "auto"
                       }}

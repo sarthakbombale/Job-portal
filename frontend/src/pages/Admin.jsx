@@ -96,16 +96,16 @@ function Admin() {
           <button className="btn btn-outline-dark btn-sm fw-bold" onClick={handleLogout}>LOGOUT</button>
         </div>
 
-        <div className="card p-4 mb-5 border-dark shadow-none" style={{ borderRadius: "0px" }}>
+        <div className="card p-4 mb-5 border-dark shadow-none" style={{ borderRadius: "10px" }}>
           <div className="d-flex justify-content-between">
             <h5 className="fw-bold text-uppercase">{editingJobId ? "Edit Listing" : "New Job Listing"}</h5>
             {editingJobId && <button className="btn btn-sm text-danger fw-bold" onClick={() => {setEditingJobId(null); setJob({title:"", description:"", location:""})}}>CANCEL</button>}
           </div>
           <form onSubmit={editingJobId ? updateJob : createJob} className="mt-3">
-            <input className="form-control border-dark mb-3 shadow-none" placeholder="Title" value={job.title} onChange={(e) => setJob({ ...job, title: e.target.value })} style={{ borderRadius: "0px" }} />
-            <textarea className="form-control border-dark mb-3 shadow-none" placeholder="Description" rows="4" value={job.description} onChange={(e) => setJob({ ...job, description: e.target.value })} style={{ borderRadius: "0px", resize: "vertical" }} />
-            <input className="form-control border-dark mb-3 shadow-none" placeholder="Location" value={job.location} onChange={(e) => setJob({ ...job, location: e.target.value })} style={{ borderRadius: "0px" }} />
-            <button className="btn btn-dark w-100 fw-bold text-uppercase" style={{ borderRadius: "0px" }}>{editingJobId ? "Update Job" : "Post Job"}</button>
+            <input className="form-control border-dark mb-3 shadow-none" placeholder="Title" value={job.title} onChange={(e) => setJob({ ...job, title: e.target.value })} style={{ borderRadius: "5px" }} />
+            <textarea className="form-control border-dark mb-3 shadow-none" placeholder="Description" rows="4" value={job.description} onChange={(e) => setJob({ ...job, description: e.target.value })} style={{ borderRadius: "5px", resize: "vertical" }} />
+            <input className="form-control border-dark mb-3 shadow-none" placeholder="Location" value={job.location} onChange={(e) => setJob({ ...job, location: e.target.value })} style={{ borderRadius: "5px" }} />
+            <button className="btn btn-dark w-100 fw-bold text-uppercase" style={{ borderRadius: "5px" }}>{editingJobId ? "Update Job" : "Post Job"}</button>
           </form>
         </div>
 
@@ -113,7 +113,7 @@ function Admin() {
         <div className="row">
           {jobs.map((j) => (
             <div className="col-md-4" key={j._id}>
-              <div className="card mb-3 border-dark shadow-none" style={{ borderRadius: "0px" }}>
+              <div className="card mb-3 border-dark shadow-none" style={{ borderRadius: "5px" }}>
                 <div className="card-body">
                   <h5 className="fw-bold">{j.title}</h5>
                   <p className="small">{j.description}</p>
@@ -130,7 +130,7 @@ function Admin() {
         </div>
 
         <h4 className="mt-5 fw-bold text-uppercase">Applicant Records</h4>
-        <div className="card p-3 border-dark shadow-none" style={{ borderRadius: "0px" }}>
+        <div className="card p-3 border-dark shadow-none" style={{ borderRadius: "10px" }}>
           {applicants.length === 0 ? <p className="text-muted">Select a job to see applicants.</p> : applicants.map((a) => (
             <div key={a._id} className="border-bottom border-dark py-2">
               <p className="m-0"><b>Name:</b> {a.userId?.name}</p>
