@@ -16,8 +16,8 @@ app.use("/api", authRoutes);
 app.use("/api", jobRoutes);
 app.use("/api", applicationRoutes);
 
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB connected"))
-.catch(err => console.log(err));
+const connectDB = require("./config/db");
+
+connectDB();
 
 app.listen(5000, () => console.log("Server running on port 5000"));
