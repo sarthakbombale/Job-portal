@@ -1,9 +1,10 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
-function Navbar() {
+function Navbar({ searchTerm, setSearchTerm }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const role = localStorage.getItem("role");
   const token = localStorage.getItem("token");
 
@@ -13,51 +14,60 @@ function Navbar() {
     toast.info("Logged Out Successfully");
   };
 
-  if (!token) return null; // Don't show navbar on Login/Register pages
+  // Guard: Don't show Navbar on Login/Register
+  if (!token || ["/", "/register"].includes(location.pathname)) return null;
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm py-3 mb-4">
+    <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom border-dark py-3 mb-5 sticky-top">
       <div className="container">
-        {/* Replace text with your JobGenie Logo later if you want */}
-        <Link className="navbar-brand fw-bold text-uppercase letter-spacing-2" to={role === "admin" ? "/admin" : "/jobs"}>
-          JobGenie
+        {/* Brand Logo */}
+        <Link className="navbar-brand d-flex align-items-center" to={role === "admin" ? "/admin" : "/jobs"}>
+          <img 
+            src="/job-genie.png" 
+            alt="Logo" 
+            style={{ height: "40px", width: "auto", objectFit: "contain" }} 
+          />
         </Link>
 
-        <button className="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span className="navbar-toggler-icon"></span>
-        </button>
+        {/* Global Search Bar (Only for /jobs) */}
+        {location.pathname === "/jobs" && (
+          <div className="flex-grow-1 mx-md-5 d-none d-md-block">
+            <div className="input-group">
+              <span className="input-group-text bg-white border-dark border-end-0 rounded-0">
+                <small>🔍</small>
+              </span>
+              <input 
+                type="text"
+                className="form-control border-dark border-start-0 rounded-0 shadow-none ps-0"
+                placeholder="SEARCH POSITIONS..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ fontSize: '13px', fontWeight: '500' }}
+              />
+            </div>
+          </div>
+        )}
 
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto align-items-center">
+        {/* Navigation Links */}
+        <div className="d-flex align-items-center gap-4">
+          <div className="d-none d-lg-flex gap-4">
             {role === "admin" ? (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link text-uppercase small fw-bold" to="/admin">Dashboard</Link>
-                </li>
-                {/* Add more admin specific links here */}
-              </>
+              <Link className="text-dark fw-bold text-uppercase text-decoration-none small" to="/admin">Admin Panel</Link>
             ) : (
               <>
-                <li className="nav-item">
-                  <Link className="nav-link text-uppercase small fw-bold" to="/jobs">Browse Jobs</Link>
-                </li>
-                {/* Link to a future 'My Applications' page */}
-                <li className="nav-item">
-                  <Link className="nav-link text-uppercase small fw-bold" to="/my-applications">My Apps</Link>
-                </li>
+                <Link className="text-dark fw-bold text-uppercase text-decoration-none small" to="/jobs">Feed</Link>
+                <Link className="text-dark fw-bold text-uppercase text-decoration-none small" to="/my-applications">History</Link>
               </>
             )}
-            
-            <li className="nav-item ms-lg-3">
-              <button 
-                className="btn btn-outline-light btn-sm text-uppercase fw-bold px-3" 
-                onClick={handleLogout}
-                style={{ borderRadius: "0px", fontSize: "12px" }}
-              >
-                Logout
-              </button>
-            </li>
-          </ul>
+          </div>
+          
+          <button 
+            className="btn btn-dark btn-sm rounded-0 px-3 fw-bold text-uppercase" 
+            onClick={handleLogout}
+            style={{ fontSize: '11px' }}
+          >
+            Sign Out
+          </button>
         </div>
       </div>
     </nav>
