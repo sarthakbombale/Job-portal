@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState } from "react";
 // Component Imports
+import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Navbar from "./components/Navbar";
@@ -24,34 +25,34 @@ const AdminRoute = ({ children }) => {
 };
 
 function App() {
-  const [searchTerm, setSearchTerm] = useState(""); // Lifted search state
+  const [searchTerm, setSearchTerm] = useState("");
 
   return (
     <BrowserRouter>
-      <div className="d-flex flex-column" style={{ minHeight: "100vh" }}>
-        <ToastContainer position="top-right" autoClose={2000} theme="dark" />
+      <Routes>
+        {/* Pages WITHOUT Navbar/Footer (Login & Register) */}
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-        {/* Pass search state and setter to Navbar */}
-        <Navbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        {/* Pages WITH Navbar/Footer (Wrapped in Layout) */}
+        <Route
+          path="/jobs"
+          element={
+            <Layout searchTerm={searchTerm} setSearchTerm={setSearchTerm}>
+              <Jobs searchTerm={searchTerm} />
+            </Layout>
+          }
+        />
 
-        <main className="flex-grow-1">
-          <Routes>
-            <Route path="/" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-
-            {/* Pass searchTerm to Jobs page */}
-            <Route
-              path="/jobs"
-              element={<PrivateRoute><Jobs searchTerm={searchTerm} /></PrivateRoute>}
-            />
-
-            <Route path="/my-applications" element={<PrivateRoute><MyApplications /></PrivateRoute>} />
-            <Route path="/admin" element={<PrivateRoute><AdminRoute><Admin /></AdminRoute></PrivateRoute>} />
-            <Route path="/admin/applicants/:jobId" element={<PrivateRoute><AdminRoute><Applicants /></AdminRoute></PrivateRoute>} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+        <Route
+          path="/my-applications"
+          element={
+            <Layout>
+              <MyApplications />
+            </Layout>
+          }
+        />
+      </Routes>
     </BrowserRouter>
   );
 }
