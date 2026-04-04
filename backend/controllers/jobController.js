@@ -77,3 +77,50 @@ exports.deleteJob = async (req, res) => {
     res.status(500).json({ msg: "Error deleting job" });
   }
 };
+
+exports.getJobById = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ msg: "Job not found" });
+    }
+
+    // Logic to check if the current user has already applied to this specific job
+    const authHeader = req.headers.authorization;
+    let isApplied = false;
+
+    if (authHeader) {
+      try {
+        // Handle Bearer token if present, otherwise use direct string
+        const token = authHeader.startsWith("Bearer ") 
+          ? authHeader.split(" ")[1] 
+          : authHeader;
+          
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        const application = await Application.findOne({ 
+          jobId: req.params.id, 
+          userId: decoded.id 
+        });
+        
+        if (application) isApplied = true;
+      } catch (tokenErr) {
+        console.log("Token verification failed in getJobById");
+      }
+    }
+
+    // Return job details with applied status
+    res.json({
+      ...job._doc,
+      isApplied
+    });
+    
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ msg: "Job not found" });
+    }
+    res.status(500).json({ msg: "Error fetching job details" });
+  }
+};

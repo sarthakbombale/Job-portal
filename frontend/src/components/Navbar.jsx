@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
+// eslint-disable-next-line no-unused-vars
 import { motion } from "framer-motion";
 import { Search, LogOut, Briefcase, History, LayoutDashboard } from "lucide-react";
 
