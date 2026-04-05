@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // IMPORT THIS
 import API from "../api";
 import { toast } from "react-toastify";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { MapPin, Zap, CheckCircle2, Building2, Clock, Cpu, ArrowRight } from "lucide-react";
 
 function Jobs({ searchTerm }) {
@@ -28,6 +28,7 @@ function Jobs({ searchTerm }) {
       });
       setJobs(res.data);
     } catch (err) {
+      console.error(err);
       toast.error("Failed to load positions");
     } finally {
       setLoading(false);
@@ -86,8 +87,36 @@ function Jobs({ searchTerm }) {
 
                   <div className="mb-3">
                     <h5 className="fw-black text-dark mb-1 text-uppercase">{job.title}</h5>
+
+                    {/* DYNAMIC COMPANY SECTION */}
                     <div className="d-flex align-items-center gap-2 text-primary small fw-bold">
-                      <Building2 size={14} /> <span>SCALEFULL TECH</span>
+                      <div 
+                        className="company-logo-mini" 
+                        style={{ 
+                          width: '28px', 
+                          height: '28px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center', 
+                          background: '#f8f9fa', 
+                          borderRadius: '6px', 
+                          border: '1px solid #eee',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        {job.companyLogo ? (
+                          <img
+                            src={job.companyLogo}
+                            alt={job.companyName}
+                            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                          />
+                        ) : (
+                          <Building2 size={14} className="text-muted" />
+                        )}
+                      </div>
+                      <span className="text-uppercase" style={{ letterSpacing: '0.5px' }}>
+                        {job.companyName || "GENERIC CORP"}
+                      </span>
                     </div>
                   </div>
 

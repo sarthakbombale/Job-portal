@@ -9,64 +9,110 @@ function JobDetails() {
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
 
-useEffect(() => {
-  let isMounted = true; // Track if component is still active
+  useEffect(() => {
+    let isMounted = true;
 
-  const fetchJob = async () => {
-    if (!id) return; // Guard: Don't fetch if ID is missing
+    const fetchJob = async () => {
+      if (!id) return;
 
-    try {
-      const token = localStorage.getItem("token");
-      const res = await API.get(`/jobs/${id}`, {
-        headers: { Authorization: token }
-      });
-      
-      if (isMounted) {
-        setJob(res.data);
+      try {
+        const token = localStorage.getItem("token");
+        const res = await API.get(`/jobs/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        if (isMounted) {
+          setJob(res.data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          console.error(err);
+          toast.error("Could not load job details");
+        }
       }
-    } catch (err) {
-      // Only show error if the component is still mounted
-      if (isMounted) {
-        console.error(err);
-        toast.error("Could not load job details");
-      }
-    }
-  };
+    };
 
-  fetchJob();
+    fetchJob();
 
-  return () => {
-    isMounted = false; // Cleanup: Stop updates when user leaves the page
-  };
-}, [id]);
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
 
   if (!job) return <div className="text-center py-5">Loading Details...</div>;
 
   return (
-    <div className="container py-5" style={{ maxWidth: "800px" }}>
-      <button className="btn btn-link text-dark p-0 mb-4" onClick={() => navigate(-1)}>
-        <ArrowLeft className="me-2" /> Back to listings
+    <div className="container py-5" style={{ maxWidth: "800px", fontFamily: "'Inter', sans-serif" }}>
+      <button 
+        className="btn btn-link text-dark p-0 mb-4 text-decoration-none d-flex align-items-center gap-2 fw-bold text-uppercase small" 
+        onClick={() => navigate(-1)}
+      >
+        <ArrowLeft size={18} /> Back to listings
       </button>
 
-      <div className="card border-0 shadow-sm p-5 rounded-4">
-        <h2 className="fw-bold text-uppercase mb-3">{job.title}</h2>
-        <div className="d-flex gap-4 mb-4 text-muted small fw-bold text-uppercase">
-          <span className="d-flex align-items-center gap-1"><Building2 size={16}/> Scalefull Tech</span>
-          <span className="d-flex align-items-center gap-1"><MapPin size={16}/> {job.location}</span>
+      <div className="card border-0 shadow-sm p-4 p-md-5 rounded-4">
+        <h2 className="fw-bold text-uppercase mb-4" style={{ letterSpacing: '-1px' }}>{job.title}</h2>
+        
+        {/* DYNAMIC COMPANY & LOCATION SECTION */}
+        <div className="d-flex align-items-center flex-wrap gap-3 mb-4">
+          <div 
+            className="company-logo-detail shadow-sm border" 
+            style={{ 
+              width: '45px', 
+              height: '45px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              background: '#fff', 
+              borderRadius: '12px', 
+              overflow: 'hidden'
+            }}
+          >
+            {job.companyLogo ? (
+              <img
+                src={job.companyLogo}
+                alt={job.companyName}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '5px' }}
+              />
+            ) : (
+              <Building2 size={24} className="text-muted opacity-50" />
+            )}
+          </div>
+          <div>
+            <div className="fw-bold text-primary text-uppercase small mb-1" style={{ letterSpacing: '0.5px' }}>
+              {job.companyName || "GENERIC CORP"}
+            </div>
+            <div className="text-muted small d-flex align-items-center gap-1 fw-bold text-uppercase">
+              <MapPin size={14} /> {job.location}
+            </div>
+          </div>
         </div>
 
-        <div className="d-flex gap-3 mb-5">
-           <div className="bg-light px-3 py-2 rounded-2 small fw-bold">💰 {job.salary}</div>
-           <div className="bg-light px-3 py-2 rounded-2 small fw-bold">💼 {job.experience}</div>
+        {/* INFO PILLS WITH ICONS */}
+        <div className="d-flex flex-wrap gap-3 mb-5">
+           <div className="d-flex align-items-center gap-2 bg-dark text-white px-3 py-2 rounded-3 small fw-bold">
+             <IndianRupee size={14} /> {job.salary || "Not Disclosed"}
+           </div>
+           <div className="d-flex align-items-center gap-2 bg-light border px-3 py-2 rounded-3 small fw-bold text-dark text-uppercase">
+             <Briefcase size={14} /> {job.experience || "0-1 Yrs"}
+           </div>
         </div>
 
-        <h5 className="fw-bold mb-3">Job Description</h5>
-        <p className="text-secondary" style={{ lineHeight: '1.8', whiteSpace: 'pre-line' }}>{job.description}</p>
+        <h6 className="fw-bold text-uppercase text-muted mb-3" style={{ letterSpacing: '1px', fontSize: '0.75rem' }}>
+          Job Description
+        </h6>
+        <p className="text-secondary mb-5" style={{ lineHeight: '1.8', whiteSpace: 'pre-line', fontSize: '0.95rem' }}>
+          {job.description}
+        </p>
 
-        <h5 className="fw-bold mt-4 mb-3">Required Skills</h5>
+        <h6 className="fw-bold text-uppercase text-muted mb-3" style={{ letterSpacing: '1px', fontSize: '0.75rem' }}>
+          Required Skills
+        </h6>
         <div className="d-flex flex-wrap gap-2">
             {job.skills?.split(',').map((s, i) => (
-                <span key={i} className="badge bg-dark rounded-pill px-3 py-2">{s.trim()}</span>
+                <span key={i} className="badge bg-light text-dark border rounded-pill px-3 py-2 text-uppercase" style={{ fontSize: '10px' }}>
+                  {s.trim()}
+                </span>
             ))}
         </div>
       </div>

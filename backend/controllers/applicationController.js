@@ -14,16 +14,20 @@ exports.applyJob = async (req, res) => {
 };
 
 // GET USER'S APPLICATIONS (CANDIDATE HISTORY)
+// GET USER'S APPLICATIONS (CANDIDATE HISTORY)
 exports.getUserApplications = async (req, res) => {
   try {
     const apps = await Application.find({ userId: req.user.id })
-      .populate("jobId", "title company location");
+      // Make sure "companyName" and "companyLogo" are included here
+      .populate("jobId", "title companyName companyLogo location")
+      .sort({ appliedAt: -1 });
+      
     res.json(apps);
   } catch (err) {
+    console.error("Fetch User Apps Error:", err);
     res.status(500).json({ msg: "Server Error" });
   }
 };
-
 // GET ALL APPLICANTS FOR A SPECIFIC JOB (ADMIN)
 exports.getApplicants = async (req, res) => {
   try {

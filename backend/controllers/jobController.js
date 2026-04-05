@@ -23,7 +23,7 @@ exports.getJobs = async (req, res) => {
   try {
     const jobs = await Job.find().sort({ createdAt: -1 });
     const authHeader = req.headers.authorization;
-    
+
     let appliedJobIds = [];
 
     // If a token is provided, find what this user has applied for
@@ -31,11 +31,11 @@ exports.getJobs = async (req, res) => {
       try {
         const token = authHeader; // Assuming token is sent directly or handle "Bearer " split
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
+
         // Find all applications by this specific user
         const userApplications = await Application.find({ userId: decoded.id });
-        
-      
+
+
         appliedJobIds = userApplications.map(app => app.jobId.toString());
       } catch (tokenErr) {
 
@@ -55,19 +55,20 @@ exports.getJobs = async (req, res) => {
 };
 
 // UPDATE JOB
+// backend/controllers/jobController.js
 exports.updateJob = async (req, res) => {
   try {
-    const job = await Job.findByIdAndUpdate(
+    const updatedJob = await Job.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      { $set: req.body }, // This takes everything from the frontend form
       { new: true }
     );
-    res.json(job);
-  } catch (err) {
-    res.status(500).json({ msg: "Error updating job" });
+    if (!updatedJob) return res.status(404).json({ message: "Job not found" });
+    res.json(updatedJob);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error during update" });
   }
 };
-
 // DELETE JOB
 exports.deleteJob = async (req, res) => {
   try {
@@ -93,17 +94,17 @@ exports.getJobById = async (req, res) => {
     if (authHeader) {
       try {
         // Handle Bearer token if present, otherwise use direct string
-        const token = authHeader.startsWith("Bearer ") 
-          ? authHeader.split(" ")[1] 
+        const token = authHeader.startsWith("Bearer ")
+          ? authHeader.split(" ")[1]
           : authHeader;
-          
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
-        const application = await Application.findOne({ 
-          jobId: req.params.id, 
-          userId: decoded.id 
+
+        const application = await Application.findOne({
+          jobId: req.params.id,
+          userId: decoded.id
         });
-        
+
         if (application) isApplied = true;
       } catch (tokenErr) {
         console.log("Token verification failed in getJobById");
@@ -115,7 +116,7 @@ exports.getJobById = async (req, res) => {
       ...job._doc,
       isApplied
     });
-    
+
   } catch (err) {
     console.error(err.message);
     if (err.kind === 'ObjectId') {
