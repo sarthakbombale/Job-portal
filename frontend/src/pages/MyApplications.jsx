@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom"; // Import Link
+import { Link } from "react-router-dom";
 import API from "../api";
 import { motion, AnimatePresence } from "framer-motion";
 import { Briefcase, Clock, CheckCircle, XCircle, MapPin, Building2, Calendar, ChevronLeft } from "lucide-react";
@@ -25,6 +25,9 @@ function MyApplications() {
     fetchMyApps();
   }, []);
 
+  // 1. FILTER VALID APPS: Create a list of apps that actually have job data
+  const validApps = apps.filter(app => app.jobId);
+
   const getStatusConfig = (status) => {
     switch (status?.toLowerCase()) {
       case "accepted":
@@ -39,30 +42,29 @@ function MyApplications() {
 
   return (
     <div className="container py-5" style={{ fontFamily: "'Inter', sans-serif" }}>
-      {/* BACK NAVIGATION */}
       <header className="mb-5 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
         <div>
           <h1 className="fw-black text-uppercase mb-1" style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1.5px' }}>
             Application <span className="text-muted">History</span>
           </h1>
+          {/* 2. UPDATE COUNT: Use validApps.length instead of apps.length */}
           <p className="text-muted text-uppercase fw-bold small mb-0">
-            Manage your {apps.length} submitted {apps.length === 1 ? 'role' : 'roles'}
+            Manage your {validApps.length} submitted {validApps.length === 1 ? 'role' : 'roles'}
           </p>
         </div>
 
-        {/* BACK TO LISTING MOVED TO RIGHT */}
         <Link
           to="/jobs"
           className="text-decoration-none text-dark fw-bold small d-inline-flex align-items-center gap-1 hover-opacity pb-1"
         >
-          <ChevronLeft size={18} className="rotate-180" />
           BACK TO LISTING
+          <ChevronLeft size={18} className="rotate-180" />
         </Link>
       </header>
 
       {loading ? (
         <div className="text-center py-5"><div className="spinner-border text-dark"></div></div>
-      ) : apps.length === 0 ? (
+      ) : validApps.length === 0 ? ( // 3. CHECK VALID APPS
         <div className="text-center py-5 border border-2 border-dashed border-dark rounded-4 bg-light">
           <Briefcase size={40} className="text-muted mb-3" />
           <h5 className="fw-bold text-uppercase">No Applications Yet</h5>
@@ -74,9 +76,10 @@ function MyApplications() {
       ) : (
         <div className="row g-4">
           <AnimatePresence>
-            {apps.map((app, index) => {
+            {/* 4. MAP OVER VALID APPS ONLY */}
+            {validApps.map((app, index) => {
               const statusConfig = getStatusConfig(app.status);
-              const job = app.jobId || {};
+              const job = app.jobId; // We know this exists now because of the filter
 
               return (
                 <motion.div
@@ -111,10 +114,10 @@ function MyApplications() {
 
                           <div>
                             <h5 className="fw-bold mb-0 text-uppercase" style={{ fontSize: '0.95rem' }}>
-                              {job.title || "Position Unavailable"}
+                              {job.title}
                             </h5>
                             <p className="text-primary mb-0 small fw-bold text-uppercase">
-                              {job.companyName || "Unknown Company"}
+                              {job.companyName}
                             </p>
                           </div>
                         </div>
@@ -136,22 +139,18 @@ function MyApplications() {
                       <div className="d-flex justify-content-between align-items-center">
                         <div className="d-flex align-items-center gap-2 text-muted small fw-bold">
                           <MapPin size={14} className="text-dark" />
-                          {job.location || "Location N/A"}
+                          {job.location}
                         </div>
 
                         <div className="d-flex align-items-center gap-2 text-muted small fw-bold">
                           <Calendar size={14} className="text-dark" />
                           <span style={{ fontSize: '9px', opacity: 0.7 }}>APPLIED:</span>
                           <span>
-                            {app.appliedAt ? (
-                              new Date(app.appliedAt).toLocaleDateString('en-IN', {
+                            {new Date(app.appliedAt).toLocaleDateString('en-IN', {
                                 day: '2-digit',
                                 month: 'short',
                                 year: 'numeric'
-                              })
-                            ) : (
-                              "Date N/A"
-                            )}
+                              })}
                           </span>
                         </div>
                       </div>
@@ -169,6 +168,7 @@ function MyApplications() {
           .card { transition: all 0.3s ease; }
           .card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important; }
           .hover-opacity:hover { opacity: 0.7; }
+          .rotate-180 { transform: rotate(180deg); }
       `}</style>
     </div>
   );
