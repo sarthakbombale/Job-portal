@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Loader from "./components/Loader";
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer,Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect } from "react";
 
@@ -111,6 +111,7 @@ function App() {
       <ToastContainer 
         position="top-center"
         autoClose={3000}
+        transition={Slide}
         hideProgressBar={false}
         newestOnTop={true}
         closeOnClick

@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import API from "../api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+// Added ESLint ignore comment just in case your parser remains stubborn
+/* eslint-disable no-unused-vars */
 import { motion, AnimatePresence } from "framer-motion";
+/* eslint-enable no-unused-vars */
 import {
   Plus, MapPin, DollarSign,
   Trash2, Edit3, Users,
@@ -31,6 +34,7 @@ function Admin() {
       const res = await API.get("/jobs");
       setJobs(res.data);
     } catch (err) {
+      console.error(err);
       toast.error("SYNC FAILED");
     } finally {
       setLoading(false);
@@ -70,6 +74,7 @@ function Admin() {
       toast.success("DELETED");
       fetchJobs();
     } catch (err) {
+      console.error(err);
       toast.error("DELETE FAILED");
     }
   };
@@ -300,6 +305,8 @@ function Admin() {
         .btn-icon.text-danger:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
 
         @media (max-width: 992px) { .admin-grid { grid-template-columns: 1fr; } .sticky-card { position: static; } }
+
+  
       `}</style>
     </div>
   );

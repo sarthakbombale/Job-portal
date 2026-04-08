@@ -2,7 +2,10 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
 import { toast } from "react-toastify";
-import { AnimatePresence, motion } from "framer-motion";
+// Added ESLint ignore comment just in case your parser remains stubborn
+/* eslint-disable no-unused-vars */
+import { motion, AnimatePresence } from "framer-motion";
+/* eslint-enable no-unused-vars */
 import { Search, CheckCircle2, Building2, Clock, ArrowRight } from "lucide-react";
 
 function Jobs({ searchTerm }) {
@@ -30,7 +33,7 @@ function Jobs({ searchTerm }) {
     return filterOptions.location.filter(loc =>
       loc.toLowerCase().includes(locationQuery.toLowerCase())
     );
-  }, [locationQuery]);
+  }, [locationQuery, filterOptions.location]);
 
   const handleFilterChange = (category, value) => {
     setSelectedFilters(prev => {
@@ -51,17 +54,18 @@ function Jobs({ searchTerm }) {
     return new Date(date).toLocaleDateString('en-IN');
   };
 
-  const fetchJobs = async () => {
+  const fetchJobs = React.useCallback(async () => {
     try {
       setLoading(true);
       const res = await API.get("/jobs", { headers: { Authorization: token } });
       setJobs(res.data);
     } catch (err) {
+      console.error(err);
       toast.error("Failed to load positions");
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   const apply = async (e, id) => {
     e.stopPropagation();
@@ -72,7 +76,9 @@ function Jobs({ searchTerm }) {
     } catch (err) { toast.error(err.response?.data?.msg || "Error applying"); }
   };
 
-  useEffect(() => { fetchJobs(); }, []);
+  useEffect(() => {
+    fetchJobs();
+  }, [fetchJobs]);
 
   const filteredJobs = jobs.filter(j => {
     const matchesSearch = (j.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -125,8 +131,8 @@ function Jobs({ searchTerm }) {
               <p className="fw-bold small text-uppercase text-muted mb-2" style={{ fontSize: '10px' }}>Location</p>
               <div className="position-relative mb-3">
                 <Search className="position-absolute top-50 start-0 translate-middle-y ms-2 text-muted" size={14} />
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   className="form-control form-control-sm ps-4 shadow-none border-light bg-light"
                   placeholder="Search Location..."
                   style={{ fontSize: '12px', borderRadius: '8px' }}
@@ -263,10 +269,10 @@ function Jobs({ searchTerm }) {
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
         .job-card-main { transition: all 0.3s ease; border: 1px solid #eee !important; }
         .standard-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        .job-card-main:hover { transform: translateY(-5px); border-color: #000 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+        .job-card-main:hover { transform: translateY(-5px); border-color: #000 !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); }
         .skill-pill { background: #f1f1f1; color: #444; padding: 3px 8px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; }
         .fw-black { font-weight: 900; }
-        .form-check-input:checked { background-color: #000; border-color: #000; }
+        .form-check-input:checked { background-color: #000000; border-color: #000; }
       `}</style>
     </div>
   );
