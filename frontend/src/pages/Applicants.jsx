@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../api";
 import { toast } from "react-toastify";
-import { motion, AnimatePresence } from "framer-motion"; // For smooth animations
+// Added ESLint ignore comment just in case your parser remains stubborn
+/* eslint-disable no-unused-vars */
+import { motion, AnimatePresence } from "framer-motion";
+/* eslint-enable no-unused-vars */
 
 function Applicants() {
   const { jobId } = useParams();
@@ -12,6 +15,10 @@ function Applicants() {
   const token = localStorage.getItem("token");
 
   // Professional Toast Style
+  useEffect(() => {
+  if (!jobId) return;
+
+  // Move the style object INSIDE the effect
   const toastStyle = {
     borderRadius: "0px",
     border: "1px solid #000",
@@ -20,43 +27,42 @@ function Applicants() {
     fontWeight: "bold"
   };
 
-  useEffect(() => {
-    // 1. PREVENT FETCH IF JOBID IS GONE (Fixes the toast error on navigate back)
-    if (!jobId) return;
-
-    const fetchApplicants = async () => {
-      try {
-        const res = await API.get(`/applicants/${jobId}`, {
-          headers: { Authorization: token },
-        });
-        setApplicants(res.data);
-      } catch (err) {
-        // Only show error if the component is still mounted and jobId exists
-        if (jobId) {
-          toast.error("DATA FETCH FAILED", { style: toastStyle });
-        }
-      } finally {
-        setLoading(false);
+  const fetchApplicants = async () => {
+    try {
+      const res = await API.get(`/applicants/${jobId}`, {
+        headers: { Authorization: token },
+      });
+      setApplicants(res.data);
+    } catch (err) {
+      console.error(err)
+      if (jobId) {
+        // Now toastStyle is locally available here
+        toast.error("DATA FETCH FAILED", { style: toastStyle });
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchApplicants();
-  }, [jobId, token]);
+  fetchApplicants();
+  
+  // Now toastStyle is NOT a dependency because it's defined inside the effect
+}, [jobId, token]);
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="container mt-5" 
+      className="container mt-5"
       style={{ minHeight: "100vh" }}
     >
       <div className="d-flex justify-content-between align-items-center border-bottom border-dark pb-3 mb-4">
         <h2 className="fw-bold text-uppercase m-0" style={{ letterSpacing: '1px' }}>
           Applicant Records
         </h2>
-        <button 
-          className="btn btn-dark fw-bold btn-sm rounded-0 px-4" 
+        <button
+          className="btn btn-dark fw-bold btn-sm rounded-0 px-4"
           onClick={() => navigate("/admin")}
         >
           BACK TO DASHBOARD
@@ -65,7 +71,7 @@ function Applicants() {
 
       <AnimatePresence mode="wait">
         {loading ? (
-          <motion.div 
+          <motion.div
             key="loader"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="text-center mt-5"
@@ -74,7 +80,7 @@ function Applicants() {
             <span className="text-uppercase small fw-bold">Syncing Records...</span>
           </motion.div>
         ) : applicants.length === 0 ? (
-          <motion.div 
+          <motion.div
             key="empty"
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -85,7 +91,7 @@ function Applicants() {
             </p>
           </motion.div>
         ) : (
-          <motion.div 
+          <motion.div
             key="table"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -101,7 +107,7 @@ function Applicants() {
               </thead>
               <tbody>
                 {applicants.map((app, index) => (
-                  <motion.tr 
+                  <motion.tr
                     key={app._id}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}

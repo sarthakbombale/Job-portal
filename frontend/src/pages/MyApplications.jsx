@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../api";
+// Added ESLint ignore comment just in case your parser remains stubborn
+/* eslint-disable no-unused-vars */
 import { motion, AnimatePresence } from "framer-motion";
+/* eslint-enable no-unused-vars */
 import { Briefcase, Clock, CheckCircle, XCircle, MapPin, Building2, Calendar, ChevronLeft } from "lucide-react";
 
 function MyApplications() {
