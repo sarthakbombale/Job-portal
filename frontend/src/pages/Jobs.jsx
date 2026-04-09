@@ -227,12 +227,12 @@ function Jobs({ searchTerm }) {
                         </div>
 
                         <div className="d-flex gap-2 mb-4">
-                          <div className="flex-fill p-2 bg-dark text-white rounded-3 text-center">
-                            <div style={{ fontSize: '7px', opacity: 0.6 }}>PACKAGE</div>
+                          <div className="flex-fill p-2 bg-primary text-white rounded-3 text-center">
+                            <div style={{ fontSize: '10px', opacity: 0.6 }}>PACKAGE</div>
                             <div className="fw-bold" style={{ fontSize: '10px' }}>{job.salary}</div>
                           </div>
                           <div className="flex-fill p-2 border border-dark rounded-3 text-center">
-                            <div style={{ fontSize: '7px', color: '#666' }}>EXP</div>
+                            <div style={{ fontSize: '10px', color: '#666' }}>EXP</div>
                             <div className="fw-bold text-dark" style={{ fontSize: '10px' }}>{job.experience}</div>
                           </div>
                         </div>
