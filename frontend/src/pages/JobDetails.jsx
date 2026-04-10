@@ -79,7 +79,7 @@ function JobDetails() {
             )}
           </div>
           <div>
-            <div className="fw-bold text-primary text-uppercase small mb-1" style={{ letterSpacing: '0.5px' }}>
+            <div className="fw-bold text-dark text-uppercase small mb-1" style={{ letterSpacing: '0.5px' }}>
               {job.companyName || "GENERIC CORP"}
             </div>
             <div className="text-muted small d-flex align-items-center gap-1 fw-bold text-uppercase">

@@ -3,6 +3,7 @@ import Loader from "./components/Loader";
 import { ToastContainer,Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import React, { useState, useEffect } from "react";
+import './index.css';
 
 // Component Imports
 import Layout from "./components/Layout";
@@ -120,6 +121,8 @@ function App() {
         draggable
         pauseOnHover
         theme="dark" 
+        stacked 
+        limit={3} 
       />
     </>
   );

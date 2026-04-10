@@ -2,18 +2,36 @@ const Job = require("../models/Job");
 const Application = require("../models/Application"); // Import Application model
 const jwt = require("jsonwebtoken");
 
-// CREATE JOB (ADMIN)
+// CREATE JOB (ADMIN) - Corrected to include all fields
 exports.createJob = async (req, res) => {
-  const { title, description, location } = req.body;
+  // Destructure EVERYTHING from req.body that your schema now supports
+  const {
+    title,
+    description,
+    location,
+    salary,
+    experience,
+    skills,
+    companyName,
+    companyLogo
+  } = req.body;
+
   try {
     const job = await Job.create({
       title,
       description,
       location,
+      salary,      
+      experience,  
+      skills,      
+      companyName, 
+      companyLogo, 
       createdBy: req.user.id
     });
-    res.json(job);
+
+    res.status(201).json(job);
   } catch (err) {
+    console.error("Create Error:", err);
     res.status(500).json({ msg: "Error creating job" });
   }
 };

@@ -1,0 +1,17 @@
+/* Toastify Responsive Fixes */
+@media (max-width: 480px) {
+  .Toastify__toast-container {
+    width: 90vw; /* Occupy 90% of screen width on mobile */
+    left: 50%;
+    transform: translateX(-50%); /* Perfectly center it */
+    margin: 0;
+    padding: 10px;
+  }
+
+  .Toastify__toast {
+    margin-bottom: 10px;
+    border-radius: 12px; /* Matches your Admin card styling */
+    min-height: 50px;
+    font-size: 13px; /* Slightly smaller text for mobile */
+  }
+}
