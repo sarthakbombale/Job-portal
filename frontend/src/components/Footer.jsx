@@ -1,6 +1,8 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+/* eslint-disable no-unused-vars */
 import { motion } from "framer-motion";
+/* eslint-enable no-unused-vars */
 import { Mail, MapPin, ShieldCheck } from "lucide-react";
 
 // Professional SVG Brand Icons (Failsafe)

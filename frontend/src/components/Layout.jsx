@@ -1,7 +1,9 @@
 import React from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+/* eslint-disable no-unused-vars */
 import { motion, AnimatePresence } from "framer-motion";
+/* eslint-enable no-unused-vars */
 import { useLocation } from "react-router-dom";
 
 const Layout = ({ children, searchTerm, setSearchTerm }) => {

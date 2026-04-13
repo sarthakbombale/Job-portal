@@ -18,6 +18,12 @@ function JobDetails() {
 
   useEffect(() => {
     const fetchJob = async () => {
+      if (!id) {
+        setJob(null);
+        setLoading(false);
+        return;
+      }
+
       try {
         const token = localStorage.getItem("token");
         const res = await API.get(`/jobs/${id}`, {
@@ -26,7 +32,12 @@ function JobDetails() {
         setJob(res.data);
       } catch (err) {
         console.error(err);
-        toast.error("Could not load job details");
+        const status = err.response?.status;
+        if (status === 404) {
+          toast.error("Job not found.");
+        } else {
+          toast.error("Could not load job details.");
+        }
       } finally {
         setLoading(false);
       }
@@ -58,8 +69,8 @@ function JobDetails() {
       {/* Top Navigation */}
       <div className="mb-4">
         <button 
-          className="btn btn-outline-dark border-0 bg-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 fw-bold text-uppercase small" 
-          onClick={() => navigate(-1)}
+          className="btn btn-outline-dark keep-black-hover border-0 bg-light rounded-pill px-3 py-2 d-flex align-items-center gap-2 fw-bold text-uppercase small" 
+          onClick={() => navigate("/jobs")}
         >
           <ArrowLeft size={16} /> Back to Listings
         </button>
@@ -188,6 +199,13 @@ function JobDetails() {
         .card { border: 1px solid #f1f5f9 !important; }
         body { background-color: #f8fafc; }
         .btn-dark:hover { background-color: #000; transform: translateY(-2px); transition: all 0.2s; }
+        .keep-black-hover:hover,
+        .keep-black-hover:focus {
+          color: #000 !important;
+          background-color: #f8fafc !important;
+          border-color: #000 !important;
+          box-shadow: none !important;
+        }
       `}</style>
     </div>
   );
