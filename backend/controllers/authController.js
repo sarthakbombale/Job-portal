@@ -28,7 +28,7 @@ exports.register = async (req, res) => {
       password: hashedPassword
     });
 
-    res.json({ msg: "Registered successfully" });
+    res.status(201).json({ msg: "Registered successfully" });
 
   } catch (err) {
     console.log("REGISTER ERROR:", err); // 🔥 THIS WILL SHOW REAL ERROR
@@ -54,7 +54,12 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET
     );
 
-    res.json({ token, role: user.role, name: user.name   });
+    res.json({
+      token,
+      role: user.role,
+      name: user.name,
+      userId: user._id,
+    });
 
   } catch (err) {
     console.log("LOGIN ERROR:", err);
