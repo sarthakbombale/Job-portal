@@ -7,6 +7,7 @@ import './index.css';
 
 // Component Imports
 import Layout from "./components/Layout";
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Jobs from "./pages/Jobs";
@@ -22,7 +23,8 @@ import { NotFoundPage, NetworkErrorPage } from "./components/Fallbacks";
 const PrivateRoute = ({ children }) => {
   const token = localStorage.getItem("token");
   if (!token || token === "undefined" || token === "null") {
-    return <Navigate to="/" replace />;
+    // Redirect unauthenticated users to login instead of landing page
+    return <Navigate to="/login" replace />;
   }
   return children;
 };
@@ -32,7 +34,7 @@ const AdminRoute = ({ children }) => {
   const role = localStorage.getItem("role");
 
   if (!token || token === "undefined" || token === "null") {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
   return role === "admin" ? children : <Navigate to="/jobs" replace />;
 };
@@ -75,8 +77,11 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          {/* Public Pages */}
-          <Route path="/" element={<Login />} />
+          {/* Public SaaS Hub */}
+          <Route path="/" element={<Landing />} />
+          
+          {/* Public Auth Pages */}
+          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
           {/* Protected User Pages */}
