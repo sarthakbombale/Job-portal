@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import { motion, AnimatePresence } from "framer-motion";
 /* eslint-enable no-unused-vars */
 import { Search, CheckCircle2, Building2, Clock, ArrowRight, SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
+import JobCardSkeleton from "../components/JobCardSkeleton";
 
 function Jobs({ searchTerm }) {
   const [jobs, setJobs] = useState([]);
@@ -57,7 +58,7 @@ function Jobs({ searchTerm }) {
       const res = await API.get("/jobs", { headers: { Authorization: token } });
       setJobs(res.data);
     } catch (err) {
-      console.errror(err);
+      console.error(err);
       toast.error("Failed to load positions");
     } finally {
       setLoading(false);
@@ -165,7 +166,11 @@ function Jobs({ searchTerm }) {
 
         <div className="col-lg-9">
           {loading ? (
-            <div className="text-center py-5"><div className="spinner-border text-dark"></div></div>
+            <div className="row g-3 g-md-4">
+              {[...Array(6)].map((_, index) => (
+                <JobCardSkeleton key={index} />
+              ))}
+            </div>
           ) : (
             <>
               <div className="row g-3 g-md-4">
@@ -209,7 +214,6 @@ function Jobs({ searchTerm }) {
                               </div>
                           </div>
                           <div className="mt-auto d-flex align-items-center justify-content-between">
-                            {/* Updated Button Logic below */}
                             <button className={`btn fw-bold text-uppercase px-4 py-2 rounded-pill ${
                                 job.isApplied 
                                 ? "btn-success border-success text-white disabled-green" 
@@ -253,7 +257,6 @@ function Jobs({ searchTerm }) {
         </div>
       </div>
 
-      {/* Mobile Filter sections remain same */}
       <div className="d-lg-none position-fixed" style={{ bottom: '85px', right: '20px', zIndex: 1060 }}>
         <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => setShowMobileFilters(true)} className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center" style={{ width: '56px', height: '56px' }}>
           <SlidersHorizontal size={24} />
