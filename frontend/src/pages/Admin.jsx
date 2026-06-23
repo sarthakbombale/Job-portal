@@ -9,7 +9,7 @@ import {
   Plus, MapPin, DollarSign,
   Trash2, Edit3, Users,
   Building2, Briefcase, Code, Link as LinkIcon,
-  CheckCircle2, SlidersHorizontal
+  CheckCircle2, SlidersHorizontal, ChevronLeft, ChevronRight
 } from "lucide-react";
 
 function Admin() {
@@ -21,7 +21,11 @@ function Admin() {
   const [jobs, setJobs] = useState([]);
   const [editingJobId, setEditingJobId] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4; // Bounded view limit per matrix frame
+
   // State for managing dropdown visibility
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isExpOpen, setIsExpOpen] = useState(false);
@@ -82,6 +86,14 @@ function Admin() {
       const token = localStorage.getItem("token");
       await API.delete(`/jobs/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       toast.success("DELETED");
+
+      // Safety adjustment for pagination index when item drops off edge frame
+      const updatedTotal = jobs.length - 1;
+      const maxRemainingPages = Math.ceil(updatedTotal / itemsPerPage) || 1;
+      if (currentPage > maxRemainingPages) {
+        setCurrentPage(maxRemainingPages);
+      }
+
       fetchJobs();
     } catch (err) {
       console.error(err);
@@ -103,42 +115,51 @@ function Admin() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Pagination Computing Logic
+  const indexOfLastJob = currentPage * itemsPerPage;
+  const indexOfFirstJob = indexOfLastJob - itemsPerPage;
+  const currentJobs = jobs.slice(indexOfFirstJob, indexOfLastJob);
+  const totalPages = Math.ceil(jobs.length / itemsPerPage) || 1;
+
   return (
     <div className="admin-page-bg">
       <div className="container-fluid admin-wrapper">
-        <header className="admin-nav flex-column flex-md-row align-items-start align-items-md-center gap-3">
+        <header className="admin-nav flex-column flex-md-row align-items-start align-items-md-center gap-2 mb-3">
           <div>
-            <h2 className="m-0 fw-bold">Admin Console</h2>
+            <h3 className="m-0 fw-black tracking-tighter">ADMIN CONSOLE</h3>
             <p className="text-muted small mb-0">Managing listings for <strong>{name}</strong></p>
           </div>
-          <div className="stats-badge">
+          <div className="stats-badge shadow-sm">
             <span className="pulse-dot"></span>
             {jobs.length} Active Jobs
           </div>
         </header>
 
-        <div className="row g-4">
-          <aside className="col-12 col-lg-4">
-            <div className="admin-card sticky-card">
+        <div className="row g-3">
+          {/* LEFT SIDE FORM PANEL */}
+          <aside className="col-12 col-lg-5">
+            <div className="admin-card">
               <div className="card-label">
-                {editingJobId ? <Edit3 size={16} /> : <Plus size={16} />}
+                {editingJobId ? <Edit3 size={14} /> : <Plus size={14} />}
                 <span>{editingJobId ? "Edit Listing" : "Create Listing"}</span>
               </div>
 
-              <form onSubmit={handleSubmit} className="mt-3">
-                <div className="form-group-custom">
-                  <label>Company Name</label>
-                  <div className="input-with-icon">
-                    <Building2 size={14} />
-                    <input type="text" placeholder="e.g. TechCorp" value={job.companyName} onChange={e => setJob({ ...job, companyName: e.target.value })} required />
+              <form onSubmit={handleSubmit} className="mt-2">
+                <div className="row g-2">
+                  <div className="col-6 form-group-custom">
+                    <label>Company Name</label>
+                    <div className="input-with-icon">
+                      <Building2 size={13} />
+                      <input type="text" placeholder="e.g. TechCorp" value={job.companyName} onChange={e => setJob({ ...job, companyName: e.target.value })} required />
+                    </div>
                   </div>
-                </div>
 
-                <div className="form-group-custom">
-                  <label>Logo URL</label>
-                  <div className="input-with-icon">
-                    <LinkIcon size={14} />
-                    <input type="text" placeholder="https://link-to-logo.png" value={job.companyLogo} onChange={e => setJob({ ...job, companyLogo: e.target.value })} />
+                  <div className="col-6 form-group-custom">
+                    <label>Logo URL</label>
+                    <div className="input-with-icon">
+                      <LinkIcon size={13} />
+                      <input type="text" placeholder="https://logo.png" value={job.companyLogo} onChange={e => setJob({ ...job, companyLogo: e.target.value })} />
+                    </div>
                   </div>
                 </div>
 
@@ -164,7 +185,7 @@ function Admin() {
                       <AnimatePresence>
                         {isExpOpen && (
                           <motion.div
-                            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 5 }} exit={{ opacity: 0, y: -10 }}
+                            initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 3 }} exit={{ opacity: 0, y: -5 }}
                             className="custom-options-container"
                           >
                             {experienceOptions.map((opt) => (
@@ -199,7 +220,7 @@ function Admin() {
                       <AnimatePresence>
                         {isSalaryOpen && (
                           <motion.div
-                            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 5 }} exit={{ opacity: 0, y: -10 }}
+                            initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 3 }} exit={{ opacity: 0, y: -5 }}
                             className="custom-options-container"
                           >
                             {salaryOptions.map((opt) => (
@@ -221,33 +242,33 @@ function Admin() {
 
                 <div className="form-group-custom">
                   <label>Location</label>
-                  <div className="custom-select-wrapper position-relative" style={{ zIndex: isLocationOpen ? 1001 : 0 }}>
+                  <div className="custom-select-wrapper position-relative" style={{ zIndex: isLocationOpen ? 1001 : 1 }}>
                     <div
                       className={`custom-select-trigger ${isLocationOpen ? 'active' : ''}`}
                       onClick={() => { setIsLocationOpen(!isLocationOpen); setIsExpOpen(false); setIsSalaryOpen(false); }}
                     >
-                      <MapPin size={14} className="text-muted" />
+                      <MapPin size={13} className="text-muted" />
                       <span className={job.location ? "text-dark" : "text-muted"}>
                         {job.location || "Select City"}
                       </span>
                       <motion.div animate={{ rotate: isLocationOpen ? 180 : 0 }} className="ms-auto">
-                        <SlidersHorizontal size={12} />
+                        <SlidersHorizontal size={11} />
                       </motion.div>
                     </div>
 
                     <AnimatePresence>
                       {isLocationOpen && (
                         <motion.div
-                          initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                          animate={{ opacity: 1, y: 5, scale: 1 }}
-                          exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                          transition={{ duration: 0.2, ease: "easeOut" }}
+                          initial={{ opacity: 0, y: -5, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 3, scale: 1 }}
+                          exit={{ opacity: 0, y: -5, scale: 0.98 }}
+                          transition={{ duration: 0.15, ease: "easeOut" }}
                           className="custom-options-container"
                         >
                           {cityOptions.map((city) => (
                             <motion.div
                               key={city}
-                              whileHover={{ x: 5, backgroundColor: "#f1f5f9" }}
+                              whileHover={{ x: 3, backgroundColor: "#f8fafc" }}
                               className={`option-item ${job.location === city ? 'selected' : ''}`}
                               onClick={() => {
                                 setJob({ ...job, location: city });
@@ -267,62 +288,111 @@ function Admin() {
                 <div className="form-group-custom">
                   <label>Skills (comma separated)</label>
                   <div className="input-with-icon">
-                    <Code size={14} />
+                    <Code size={13} />
                     <input type="text" placeholder="React, Node, MongoDB" value={job.skills} onChange={e => setJob({ ...job, skills: e.target.value })} />
                   </div>
                 </div>
 
                 <div className="form-group-custom">
                   <label>Description</label>
-                  <textarea rows="4" placeholder="Brief job summary..." value={job.description} onChange={e => setJob({ ...job, description: e.target.value })} required></textarea>
+                  <textarea rows="2" placeholder="Brief job summary..." value={job.description} onChange={e => setJob({ ...job, description: e.target.value })} required></textarea>
                 </div>
 
-                <button type="submit" className="btn-admin-primary mt-2">
+                <button type="submit" className="btn-admin-primary mt-1 py-2 text-uppercase tracking-wider fw-bold">
                   {editingJobId ? "Update Posting" : "Publish Listing"}
                 </button>
                 {editingJobId && (
-                  <button type="button" className="btn-admin-outline w-100 mt-2" onClick={() => { setEditingJobId(null); setJob({ title: "", description: "", location: "", salary: "", experience: "", skills: "", companyName: "", companyLogo: "" }) }}>Cancel Edit</button>
+                  <button
+                    type="button"
+                    className="btn w-100 mt-2 fw-bold text-uppercase py-2 admin-cancel-btn"
+                    style={{ fontSize: "11px", borderRadius: "8px", letterSpacing: "0.5px" }}
+                    onClick={() => {
+                      setEditingJobId(null);
+                      setJob({ title: "", description: "", location: "", salary: "", experience: "", skills: "", companyName: "", companyLogo: "" });
+                    }}
+                  >
+                    Cancel Edit
+                  </button>
                 )}
               </form>
             </div>
           </aside>
 
-          <main className="col-12 col-lg-8">
-            <div className="d-flex align-items-center gap-2 mb-4">
-              <h5 className="fw-bold m-0 text-nowrap">Live Postings</h5>
-              <div className="flex-grow-1 border-bottom"></div>
+          {/* RIGHT SIDE DATA PANEL WITH PAGINATION */}
+          <main className="col-12 col-lg-7 d-flex flex-column justify-content-start gap-2">
+            <div>
+              <div className="d-flex align-items-center gap-2 mb-2">
+                <h6 className="fw-black m-0 text-nowrap text-uppercase tracking-tight" style={{ fontSize: "13px" }}>Live Postings</h6>
+                <div className="flex-grow-1 border-bottom"></div>
+              </div>
+
+              {loading ? (
+                <div className="text-center p-5"><div className="spinner-border spinner-border-sm text-dark"></div></div>
+              ) : (
+                <div className="listings-stack">
+                  {currentJobs.length === 0 ? (
+                    <div className="text-center text-muted p-4 border rounded-3 bg-white small">No active vacancies posted yet.</div>
+                  ) : (
+                    <AnimatePresence mode="popLayout">
+                      {currentJobs.map(j => (
+                        <motion.div
+                          key={j._id}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, x: -10 }}
+                          transition={{ duration: 0.2 }}
+                          className="job-item-card flex-row align-items-center justify-content-between"
+                        >
+                          <div className="job-item-left overflow-hidden me-2">
+                            <div className="company-icon-box flex-shrink-0">
+                              {j.companyLogo ? <img src={j.companyLogo} alt="logo" /> : <Building2 size={16} className="text-muted" />}
+                            </div>
+                            <div className="overflow-hidden">
+                              <h6 className="fw-bold mb-0 text-truncate small-title-text">{j.title}</h6>
+                              <p className="company-text-small text-truncate mb-1">{j.companyName}</p>
+                              <div className="job-item-meta">
+                                <span><MapPin size={10} /> {j.location}</span>
+                                <span><Briefcase size={10} /> {j.experience}</span>
+                                <span><DollarSign size={10} /> {j.salary}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="job-item-actions flex-shrink-0">
+                            <button className="btn-icon" onClick={() => navigate(`/admin/applicants/${j._id}`)} title="Applicants"><Users size={14} /></button>
+                            <button className="btn-icon" onClick={() => { setJob(j); setEditingJobId(j._id); }} title="Edit"><Edit3 size={14} /></button>
+                            <button className="btn-icon text-danger" onClick={() => executeDelete(j._id)} title="Delete"><Trash2 size={14} /></button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  )}
+                </div>
+              )}
             </div>
 
-            {loading ? (
-              <div className="text-center p-5"><div className="spinner-border spinner-border-sm"></div></div>
-            ) : (
-              <div className="listings-stack">
-                <AnimatePresence>
-                  {jobs.map(j => (
-                    <motion.div key={j._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} className="job-item-card flex-column flex-sm-row">
-                      <div className="job-item-left w-100">
-                        <div className="company-icon-box flex-shrink-0">
-                          {j.companyLogo ? <img src={j.companyLogo} alt="logo" /> : <Building2 size={20} className="text-muted" />}
-                        </div>
-                        <div className="flex-grow-1 overflow-hidden">
-                          <h6 className="fw-bold mb-0 text-truncate">{j.title}</h6>
-                          <p className="company-text-small text-truncate">{j.companyName}</p>
-                          <div className="job-item-meta">
-                            <span><MapPin size={12} /> {j.location}</span>
-                            <span><Briefcase size={12} /> {j.experience}</span>
-                            <span><DollarSign size={12} /> {j.salary}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="job-item-actions mt-3 mt-sm-0 w-sm-auto justify-content-end w-100">
-                        <button className="btn-icon" onClick={() => navigate(`/admin/applicants/${j._id}`)} title="Applicants"><Users size={16} /></button>
-                        <button className="btn-icon" onClick={() => { setJob(j); setEditingJobId(j._id); window.scrollTo({ top: 0, behavior: 'smooth' }) }} title="Edit"><Edit3 size={16} /></button>
-                        <button className="btn-icon text-danger" onClick={() => executeDelete(j._id)} title="Delete"><Trash2 size={16} /></button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+            {/* INTEGRATED CLIENT-SIDE PAGINATION TRACKER */}
+            {!loading && jobs.length > itemsPerPage && (
+              <div className="d-flex align-items-center justify-content-between bg-white px-3 py-1.5 border rounded-3 shadow-sm component-pagination-bar">
+                <span className="text-muted text-uppercase fw-bold" style={{ fontSize: "9px", letterSpacing: "0.5px", padding:"1rem" }}>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <div className="d-flex gap-1">
+                  <button
+                    className="btn btn-sm btn-light border p-0 rounded d-flex align-items-center justify-content-center pagination-ctrl-btn"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  >
+                    <ChevronLeft size={13} />
+                  </button>
+                  <button
+                    className="btn btn-sm btn-light border p-0 rounded d-flex align-items-center justify-content-center pagination-ctrl-btn"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  >
+                    <ChevronRight size={13} />
+                  </button>
+                </div>
               </div>
             )}
           </main>
@@ -330,69 +400,71 @@ function Admin() {
       </div>
 
       <style>{`
-        .admin-page-bg { background: #f4f7fe; min-height: 100vh; font-family: 'Inter', sans-serif; padding: 10px; }
-        .admin-wrapper { max-width: 1200px; margin: 0 auto; padding: 20px 0; }
-        .admin-nav { display: flex; justify-content: space-between; margin-bottom: 30px; }
-        .stats-badge { background: #fff; padding: 8px 16px; border-radius: 50px; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; border: 1px solid #e0e6ed; width: fit-content; }
-        .pulse-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        .fw-black { font-weight: 900; }
+        .admin-page-bg { background: #f8fafc; min-height: calc(100vh - 56px); font-family: 'Inter', sans-serif; }
+        .admin-wrapper { max-width: 1200px; margin: 0 auto; padding: 15px 10px; }
+        .admin-nav { display: flex; justify-content: space-between; }
+        .stats-badge { background: #fff; padding: 6px 14px; border-radius: 50px; font-weight: 700; font-size: 11px; display: flex; align-items: center; gap: 6px; border: 1px solid #e2e8f0; width: fit-content; }
+        .pulse-dot { width: 6px; height: 6px; background: #22c55e; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
 
-        .admin-card { background: #fff; border-radius: 16px; padding: 24px; border: 1px solid #e0e6ed; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: visible !important; }
-        .sticky-card { position: sticky; top: 20px; z-index: 10; }
-        .card-label { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 12px; text-transform: uppercase; color: #1e293b; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; }
+        .admin-card { background: #fff; border-radius: 12px; padding: 16px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .card-label { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 11px; text-transform: uppercase; color: #0f172a; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
 
-        .custom-select-wrapper { z-index: 100; }
         .custom-select-trigger {
-          display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0;
-          padding: 10px 12px; border-radius: 12px; cursor: pointer; font-size: 13px; transition: all 0.3s ease;
+          display: flex; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0;
+          padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; transition: all 0.2s ease;
         }
-        .custom-select-trigger:hover, .custom-select-trigger.active { background: #fff; border-color: #000; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .custom-select-trigger:hover, .custom-select-trigger.active { background: #fff; border-color: #000; }
 
         .custom-options-container {
           position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0;
-          border-radius: 14px; padding: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-          max-height: 250px; overflow-y: auto; z-index: 9999;
+          border-radius: 10px; padding: 4px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+          max-height: 180px; overflow-y: auto; z-index: 9999;
         }
 
         .option-item {
-          padding: 8px 10px; border-radius: 8px; font-size: 12px; font-weight: 500; color: #475569;
-          cursor: pointer; display: flex; align-items: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          padding: 6px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; color: #334155;
+          cursor: pointer; display: flex; align-items: center; transition: all 0.15s ease;
         }
-        .option-item:hover { color: #000; font-weight: 600; background: #f8fafc; }
+        .option-item:hover { color: #000; background: #f1f5f9; }
         .option-item.selected { background: #f1f5f9; color: #000; font-weight: 700; }
 
-        .custom-options-container::-webkit-scrollbar { width: 4px; }
-        .custom-options-container::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-
-        .form-group-custom { margin-bottom: 15px; }
-        .form-group-custom label { display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .form-group-custom { margin-bottom: 10px; }
+        .form-group-custom label { display: block; font-size: 9px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 4px; letter-spacing: 0.5px; }
         .input-with-icon { position: relative; display: flex; align-items: center; }
-        .input-with-icon svg { position: absolute; left: 12px; color: #94a3b8; pointer-events: none; }
-        .input-with-icon input { padding-left: 35px !important; }
+        .input-with-icon svg { position: absolute; left: 10px; color: #94a3b8; pointer-events: none; }
+        .input-with-icon input { padding-left: 28px !important; }
 
         .form-group-custom input, .form-group-custom textarea { 
-          width: 100%; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; 
-          font-size: 14px; background: #f8fafc; outline: none; transition: 0.2s; color: #1e293b;
+          width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 7px 10px; 
+          font-size: 13px; background: #f8fafc; outline: none; transition: 0.2s; color: #0f172a;
         }
+        .form-group-custom input:focus, .form-group-custom textarea:focus { background: #fff; border-color: #000; }
 
-        .btn-admin-primary { width: 100%; background: #000; color: #fff; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 14px; transition: 0.2s; }
-        .btn-admin-primary:hover { background: #333; transform: translateY(-1px); }
+        .btn-admin-primary { width: 100%; background: #000; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 12px; transition: 0.2s; }
+        .btn-admin-primary:hover { background: #222; }
 
-        .job-item-card { background: #fff; border: 1px solid #e0e6ed; border-radius: 16px; padding: 18px 24px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; transition: 0.3s; }
-        .job-item-card:hover { border-color: #000; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .job-item-left { display: flex; align-items: center; gap: 15px; min-width: 0; }
-        .company-icon-box { width: 45px; height: 45px; background: #f8fafc; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #e2e8f0; }
+        .job-item-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; display: flex; gap: 12px; }
+        .job-item-card:hover { border-color: #cbd5e1; }
+        .job-item-left { display: flex; align-items: center; gap: 12px; }
+        .company-icon-box { width: 36px; height: 36px; background: #f8fafc; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #e2e8f0; }
         .company-icon-box img { width: 100%; height: 100%; object-fit: contain; }
-        .job-item-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: #64748b; margin-top: 4px; }
-        .job-item-meta span { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
-        .job-item-actions { display: flex; gap: 8px; }
-        .btn-icon { width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        
+        .small-title-text { font-size: 13px; letter-spacing: -0.2px; }
+        .company-text-small { font-size: 11px; color: #64748b; margin-bottom: 0px; }
+        .job-item-meta { display: flex; gap: 8px; font-size: 10px; color: #64748b; }
+        .job-item-meta span { display: flex; align-items: center; gap: 3px; }
+        .job-item-actions { display: flex; gap: 4px; align-items: center; }
+        .btn-icon { width: 30px; height: 30px; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: flex; align-items: center; justify-content: center; transition: 0.15s; }
+        .btn-icon:hover { border-color: #000; color: #000; }
+        .btn-icon.text-danger:hover { border-color: #ef4444; color: #ef4444 !important; background: #fef2f2; }
 
-        @media (max-width: 768px) {
-          .admin-page-bg { padding: 10px 5px; }
-          .admin-card { padding: 16px; }
-          .job-item-card { padding: 15px; }
-          .sticky-card { position: static; margin-bottom: 20px; }
+        .admin-cancel-btn { background-color: transparent; color: #64748b; border: 1px solid #e2e8f0; transition: all 0.15s ease; }
+        .admin-cancel-btn:hover { background-color: #000; border-color: #000; color: #fff; }
+
+        @media (max-width: 991px) {
+          .admin-wrapper { padding: 10px; }
         }
       `}</style>
     </div>
