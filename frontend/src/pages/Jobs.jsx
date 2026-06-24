@@ -13,7 +13,7 @@ function Jobs({ searchTerm }) {
   const [loading, setLoading] = useState(true);
   const [locationQuery, setLocationQuery] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = 6;
 
@@ -90,10 +90,14 @@ function Jobs({ searchTerm }) {
   };
 
   const getRelativeTime = (date) => {
-    const diff = Math.floor((new Date() - new Date(date)) / 1000);
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) return "RECENTLY";
+
+    const diff = Math.floor((new Date() - parsedDate) / 1000);
+    if (diff < 60) return "JUST NOW";
     if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return new Date(date).toLocaleDateString('en-IN');
+    return parsedDate.toLocaleDateString('en-IN');
   };
 
   const apply = async (e, id) => {
@@ -174,61 +178,84 @@ function Jobs({ searchTerm }) {
           ) : (
             <>
               <div className="row g-3 g-md-4">
-                <AnimatePresence mode='wait'>
+                <AnimatePresence mode='popLayout'>
                   {currentJobs.length > 0 ? (
-                    currentJobs.map((job) => (
-                      <div className="col-md-6 col-xl-4" key={job._id}>
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ duration: 0.2 }}
-                          onClick={() => navigate(`/job/${job._id}`)}
-                          className="card border-0 p-4 job-card-main standard-shadow h-100"
-                          style={{ cursor: 'pointer', borderRadius: '24px' }}
-                        >
-                          <div className="d-flex justify-content-between align-items-center mb-3">
-                            <div className="d-flex align-items-center gap-2 px-2 py-1 bg-light rounded-pill border" style={{ fontSize: '10px' }}>
-                              <Clock size={12} className="text-muted" />
-                              <span className="fw-bold text-dark text-uppercase">{getRelativeTime(job.createdAt)}</span>
+                    currentJobs.map((job, index) => {
+                      const uniqueKey = (job._id && job._id.trim() !== "") ? job._id : (job.id || `job-idx-${index}`);
+
+                      return (
+                        <div className="col-md-6 col-xl-4" key={uniqueKey}>
+                          <motion.div
+                            key={uniqueKey}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.2 }}
+                            onClick={() => {
+                              const jobId = job._id || job.id;
+                              if (!jobId) { console.warn('Job id missing, ignoring click.'); return; }
+                              navigate(`/job/${jobId}`);
+                            }}
+                            className="card border-0 p-4 job-card-main standard-shadow h-100"
+                            style={{ cursor: 'pointer', borderRadius: '24px' }}
+                          >
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                              <div className="d-flex align-items-center gap-2 px-2 py-1 bg-light rounded-pill border" style={{ fontSize: '10px' }}>
+                                <Clock size={12} className="text-muted" />
+                                <span className="fw-bold text-dark text-uppercase">
+                                  {job.createdAt ? getRelativeTime(job.createdAt) : "JUST NOW"}
+                                </span>
+                              </div>
+                              {job.isApplied && <CheckCircle2 size={20} className="text-success" />}
                             </div>
-                            {job.isApplied && <CheckCircle2 size={20} className="text-success" />}
-                          </div>
-                          <div className="mb-3">
-                            <h5 className="fw-black text-dark mb-1 text-uppercase" style={{ fontSize: '1rem' }}>{job.title}</h5>
-                            <div className="d-flex align-items-center gap-2 text-primary small fw-bold">
-                              <span className="text-uppercase">{job.companyName}</span>
+
+                            <div className="mb-4 d-flex align-items-center gap-3">
+                              <div className="bg-light border rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '60px', height: '60px' }}>
+                                {job.companyLogo ? (
+                                  <img src={job.companyLogo} alt="logo" style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain' }} />
+                                ) : (
+                                  <Building2 size={40} className="text-muted opacity-50" />
+                                )}
+                              </div>
+                              <div className="flex-grow-1">
+                                <h5 className="fw-black text-dark mb-1 text-uppercase" style={{ fontSize: '1rem', lineHeight: '1.2' }}>{job.title}</h5>
+                                <div className="d-flex align-items-center gap-2 text-primary small fw-bold">
+                                  <span className="text-uppercase">{job.companyName}</span>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                          <div className="mb-3 d-flex flex-wrap gap-1">
-                            {job.skills?.split(',').slice(0, 3).map((s, i) => (
-                              <span key={i} className="skill-pill">{s.trim()}</span>
-                            ))}
-                          </div>
-                          <div className="d-flex gap-2 mb-4">
+
+                            <div className="mb-3 d-flex flex-wrap gap-1">
+                              {job.skills?.split(',').slice(0, 3).map((s, i) => (
+                                <span key={i} className="skill-pill">{s.trim()}</span>
+                              ))}
+                            </div>
+
+                            <div className="d-flex gap-2 mb-4">
                               <div className="flex-fill p-2 bg-primary text-white rounded-3 text-center">
                                 <div className="fw-bold" style={{ fontSize: '10px' }}>{job.salary}</div>
                               </div>
                               <div className="flex-fill p-2 border border-dark rounded-3 text-center">
                                 <div className="fw-bold text-dark" style={{ fontSize: '10px' }}>{job.experience}</div>
                               </div>
-                          </div>
-                          <div className="mt-auto d-flex align-items-center justify-content-between">
-                            <button className={`btn fw-bold text-uppercase px-4 py-2 rounded-pill ${
-                                job.isApplied 
-                                ? "btn-success border-success text-white disabled-green" 
+                            </div>
+
+                            <div className="mt-auto d-flex align-items-center justify-content-between">
+                              <button className={`btn fw-bold text-uppercase px-4 py-2 rounded-pill ${job.isApplied
+                                ? "btn-success border-success text-white disabled-green"
                                 : "btn-dark"
-                              }`} 
-                              disabled={job.isApplied} 
-                              onClick={(e) => apply(e, job._id)} 
-                              style={{ fontSize: '13px' }}>
-                              {job.isApplied ? "Applied" : "Quick Apply"}
-                            </button>
-                            <ArrowRight size={18} className="text-muted" />
-                          </div>
-                        </motion.div>
-                      </div>
-                    ))
+                                }`}
+                                disabled={job.isApplied}
+                                onClick={(e) => apply(e, job._id || job.id)}
+                                style={{ fontSize: '13px' }}>
+                                {job.isApplied ? "Applied" : "Quick Apply"}
+                              </button>
+                              <ArrowRight size={18} className="text-muted" />
+                            </div>
+                          </motion.div>
+                        </div>
+                      );
+                    })
                   ) : (
                     <div className="text-center py-5 w-100">
                       <p className="text-muted fw-bold text-uppercase">No matches found.</p>

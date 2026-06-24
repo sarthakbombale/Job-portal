@@ -21,11 +21,11 @@ exports.createJob = async (req, res) => {
       title,
       description,
       location,
-      salary,      
-      experience,  
-      skills,      
-      companyName, 
-      companyLogo, 
+      salary,
+      experience,
+      skills,
+      companyName,
+      companyLogo,
       createdBy: req.user.id
     });
 
@@ -39,7 +39,7 @@ exports.createJob = async (req, res) => {
 // GET ALL JOBS (With "Already Applied" Logic)
 exports.getJobs = async (req, res) => {
   try {
-    const jobs = await Job.find().sort({ createdAt: -1 });
+    const jobs = await Job.find().sort({ createdAt: -1 }).lean();
     const authHeader = req.headers.authorization;
 
     let appliedJobIds = [];
@@ -47,12 +47,12 @@ exports.getJobs = async (req, res) => {
     // If a token is provided, find what this user has applied for
     if (authHeader) {
       try {
-        const token = authHeader; // Assuming token is sent directly or handle "Bearer " split
+        const token = authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : authHeader;
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         // Find all applications by this specific user
-        const userApplications = await Application.find({ userId: decoded.id });
-
+        const userApplications = await Application.find({ userId: decoded.id }).select("jobId")
+          .lean();
 
         appliedJobIds = userApplications.map(app => app.jobId.toString());
       } catch (tokenErr) {
@@ -62,7 +62,7 @@ exports.getJobs = async (req, res) => {
     }
 
     const jobsWithStatus = jobs.map(job => ({
-      ...job._doc,
+      ...job,
       isApplied: appliedJobIds.includes(job._id.toString())
     }));
 
@@ -99,7 +99,7 @@ exports.deleteJob = async (req, res) => {
 
 exports.getJobById = async (req, res) => {
   try {
-    const job = await Job.findById(req.params.id);
+    const job = await Job.findById(req.params.id).lean();
 
     if (!job) {
       return res.status(404).json({ msg: "Job not found" });
@@ -121,7 +121,7 @@ exports.getJobById = async (req, res) => {
         const application = await Application.findOne({
           jobId: req.params.id,
           userId: decoded.id
-        });
+        }).select("-id").lean();
 
         if (application) isApplied = true;
       } catch (tokenErr) {
@@ -131,7 +131,7 @@ exports.getJobById = async (req, res) => {
 
     // Return job details with applied status
     res.json({
-      ...job._doc,
+      ...job,
       isApplied
     });
 

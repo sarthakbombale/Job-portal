@@ -13,15 +13,15 @@ exports.applyJob = async (req, res) => {
   res.json(app);
 };
 
-// GET USER'S APPLICATIONS (CANDIDATE HISTORY)
+
 // GET USER'S APPLICATIONS (CANDIDATE HISTORY)
 exports.getUserApplications = async (req, res) => {
   try {
     const apps = await Application.find({ userId: req.user.id })
       // Make sure "companyName" and "companyLogo" are included here
       .populate("jobId", "title companyName companyLogo location")
-      .sort({ appliedAt: -1 });
-      
+      .sort({ appliedAt: -1 }).lean();
+
     res.json(apps);
   } catch (err) {
     console.error("Fetch User Apps Error:", err);
@@ -34,11 +34,11 @@ exports.getApplicants = async (req, res) => {
     const { jobId } = req.params;
     // We find by jobId and populate the user details
     const apps = await Application.find({ jobId })
-      .populate("userId", "name email");
+      .populate("userId", "name email").lean();
 
     res.json(apps);
   } catch (err) {
     console.error("Fetch Applicants Error:", err);
     res.status(500).json({ msg: "Error fetching applicants" });
-  }  
+  }
 };

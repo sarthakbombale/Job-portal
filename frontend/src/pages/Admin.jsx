@@ -334,37 +334,42 @@ function Admin() {
                     <div className="text-center text-muted p-4 border rounded-3 bg-white small">No active vacancies posted yet.</div>
                   ) : (
                     <AnimatePresence mode="popLayout">
-                      {currentJobs.map(j => (
-                        <motion.div
-                          key={j._id}
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, x: -10 }}
-                          transition={{ duration: 0.2 }}
-                          className="job-item-card flex-row align-items-center justify-content-between"
-                        >
-                          <div className="job-item-left overflow-hidden me-2">
-                            <div className="company-icon-box flex-shrink-0">
-                              {j.companyLogo ? <img src={j.companyLogo} alt="logo" /> : <Building2 size={16} className="text-muted" />}
-                            </div>
-                            <div className="overflow-hidden">
-                              <h6 className="fw-bold mb-0 text-truncate small-title-text">{j.title}</h6>
-                              <p className="company-text-small text-truncate mb-1">{j.companyName}</p>
-                              <div className="job-item-meta">
-                                <span><MapPin size={10} /> {j.location}</span>
-                                <span><Briefcase size={10} /> {j.experience}</span>
-                                <span><DollarSign size={10} /> {j.salary}</span>
+                      {currentJobs.map((j, index) => {
+                        // Safely evaluate unique fallback tracker key to handle incomplete database fields
+                        const safeKey = j._id || j.id || `admin-job-idx-${index}`;
+                        
+                        return (
+                          <motion.div
+                            key={safeKey}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="job-item-card flex-row align-items-center justify-content-between"
+                          >
+                            <div className="job-item-left overflow-hidden me-2">
+                              <div className="company-icon-box flex-shrink-0">
+                                {j.companyLogo ? <img src={j.companyLogo} alt="logo" /> : <Building2 size={16} className="text-muted" />}
+                              </div>
+                              <div className="overflow-hidden">
+                                <h6 className="fw-bold mb-0 text-truncate small-title-text">{j.title || "No Title Listed"}</h6>
+                                <p className="company-text-small text-truncate mb-1">{j.companyName || "Unknown Company"}</p>
+                                <div className="job-item-meta">
+                                  <span><MapPin size={10} /> {j.location || "N/A"}</span>
+                                  <span><Briefcase size={10} /> {j.experience || "N/A"}</span>
+                                  <span><DollarSign size={10} /> {j.salary || "N/A"}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
 
-                          <div className="job-item-actions flex-shrink-0">
-                            <button className="btn-icon" onClick={() => navigate(`/admin/applicants/${j._id}`)} title="Applicants"><Users size={14} /></button>
-                            <button className="btn-icon" onClick={() => { setJob(j); setEditingJobId(j._id); }} title="Edit"><Edit3 size={14} /></button>
-                            <button className="btn-icon text-danger" onClick={() => executeDelete(j._id)} title="Delete"><Trash2 size={14} /></button>
-                          </div>
-                        </motion.div>
-                      ))}
+                            <div className="job-item-actions flex-shrink-0">
+                              <button className="btn-icon" onClick={() => navigate(`/admin/applicants/${j._id}`)} title="Applicants"><Users size={14} /></button>
+                              <button className="btn-icon" onClick={() => { setJob(j); setEditingJobId(j._id); }} title="Edit"><Edit3 size={14} /></button>
+                              <button className="btn-icon text-danger" onClick={() => executeDelete(j._id)} title="Delete"><Trash2 size={14} /></button>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </AnimatePresence>
                   )}
                 </div>

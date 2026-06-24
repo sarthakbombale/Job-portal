@@ -18,9 +18,11 @@ function JobDetails() {
 
   useEffect(() => {
     const fetchJob = async () => {
-      if (!id) {
+      if (!id || id === 'undefined' || id === 'null') {
         setJob(null);
         setLoading(false);
+        // Invalid id: silently return user to listings instead of showing a popup
+        navigate('/jobs');
         return;
       }
 
@@ -31,12 +33,21 @@ function JobDetails() {
         });
         setJob(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("Failed fetching job details:", {
+          url: err.config?.url,
+          method: err.config?.method,
+          status: err.response?.status,
+          data: err.response?.data,
+          message: err.message
+        });
+
         const status = err.response?.status;
         if (status === 404) {
           toast.error("Job not found.");
+        } else if (status === 401 || status === 403) {
+          toast.error("Unauthorized. Please login again.");
         } else {
-          toast.error("Could not load job details.");
+          toast.error(`Could not load job details (${status || 'network error'}).`);
         }
       } finally {
         setLoading(false);
@@ -48,11 +59,16 @@ function JobDetails() {
   const apply = async () => {
     try {
       const token = localStorage.getItem("token");
-      await API.post(`/apply/${id}`, {}, { headers: { Authorization: token } });
+      if (!id || id === 'undefined' || id === 'null') {
+        console.warn('Invalid job id. Cannot apply.');
+        return;
+      }
+      await API.post(`/apply/${id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
       toast.success("Application successful! 🚀");
       setJob(prev => ({ ...prev, isApplied: true }));
     } catch (err) {
-      toast.error(err.response?.data?.msg || "Error applying");
+      console.error('Apply failed', { url: err.config?.url, data: err.response?.data, status: err.response?.status, message: err.message });
+      toast.error(err.response?.data?.msg || `Error applying (${err.response?.status || 'network'})`);
     }
   };
 
