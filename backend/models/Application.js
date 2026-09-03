@@ -24,6 +24,14 @@ const applicationSchema = new mongoose.Schema({
     size: { type: Number },
     url: { type: String }
   }
+  ,
+  // Application status tracking
+  status: {
+    type: String,
+    enum: ["pending", "accepted", "rejected"],
+    default: "pending"
+  },
+  statusUpdatedAt: { type: Date }
 });
 
 // Enforces one application per user per job
