@@ -15,6 +15,8 @@ function JobDetails() {
   const navigate = useNavigate();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [resumeFile, setResumeFile] = useState(null);
+  const [resumePreview, setResumePreview] = useState(null);
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -59,17 +61,27 @@ function JobDetails() {
   const apply = async () => {
     try {
       const token = localStorage.getItem("token");
-      if (!id || id === 'undefined' || id === 'null') {
-        console.warn('Invalid job id. Cannot apply.');
-        return;
-      }
-      await API.post(`/apply/${id}`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      if (!id || id === 'undefined' || id === 'null') return;
+
+      const form = new FormData();
+      if (resumeFile) form.append('resume', resumeFile);
+
+      await API.post(`/apply/${id}`, form, { headers: { Authorization: `Bearer ${token}` } });
       toast.success("Application successful! 🚀");
       setJob(prev => ({ ...prev, isApplied: true }));
+      setResumeFile(null);
+      setResumePreview(null);
     } catch (err) {
       console.error('Apply failed', { url: err.config?.url, data: err.response?.data, status: err.response?.status, message: err.message });
       toast.error(err.response?.data?.msg || `Error applying (${err.response?.status || 'network'})`);
     }
+  };
+
+  const onFileChange = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return setResumeFile(null);
+    setResumeFile(f);
+    setResumePreview(f.name);
   };
 
   if (loading) return (
@@ -179,20 +191,30 @@ function JobDetails() {
                 </div>
               </div>
 
-              <button 
-                onClick={apply}
-                disabled={job.isApplied}
-                className={`btn w-100 py-3 rounded-pill fw-black text-uppercase shadow-sm ${
-                  job.isApplied ? "btn-light text-success border" : "btn-dark"
-                }`}
-                style={{ fontSize: '12px' }}
-              >
-                {job.isApplied ? (
+              {!job.isApplied && (
+                <>
+                  <div className="mb-3">
+                    <label className="form-label small text-uppercase fw-bold">Upload Resume (optional)</label>
+                    <input type="file" accept=".pdf,.doc,.docx" className="form-control" onChange={onFileChange} />
+                    {resumePreview && <div className="small text-muted mt-2">Selected: {resumePreview}</div>}
+                  </div>
+                  <button 
+                    onClick={apply}
+                    disabled={job.isApplied}
+                    className={`btn w-100 py-3 rounded-pill fw-black text-uppercase shadow-sm ${
+                      job.isApplied ? "btn-light text-success border" : "btn-dark"
+                    }`}
+                    style={{ fontSize: '12px' }}
+                  >
+                    Apply
+                  </button>
+                </>
+              )}
+              {job.isApplied && (
+                <button className="btn w-100 py-3 rounded-pill fw-black text-uppercase shadow-sm btn-light text-success border" disabled>
                   <><CheckCircle2 size={16} className="me-2" /> Application Sent</>
-                ) : (
-                  "Apply"
-                )}
-              </button>
+                </button>
+              )}
             </div>
 
             {/* Missing Skills Warning */}

@@ -2,15 +2,33 @@ const Application = require("../models/Application");
 
 // APPLY JOB (CANDIDATE)
 exports.applyJob = async (req, res) => {
-  const { jobId } = req.params;
-  const alreadyApplied = await Application.findOne({ userId: req.user.id, jobId });
+  try {
+    const { jobId } = req.params;
 
-  if (alreadyApplied) {
-    return res.status(400).json({ msg: "Already applied" });
+    const alreadyApplied = await Application.findOne({ userId: req.user.id, jobId });
+    if (alreadyApplied) return res.status(400).json({ msg: "Already applied" });
+
+    // If multer saved a file, include metadata
+    const resumeMeta = req.file
+      ? {
+          filename: req.file.filename,
+          originalName: req.file.originalname,
+          mimeType: req.file.mimetype,
+          size: req.file.size,
+          url: `/uploads/resumes/${req.file.filename}`
+        }
+      : undefined;
+
+    const payload = { userId: req.user.id, jobId };
+    if (resumeMeta) payload.resume = resumeMeta;
+
+    const app = await Application.create(payload);
+    res.json(app);
+  } catch (err) {
+    console.error('Apply Job Error:', err);
+    if (err.code === 11000) return res.status(400).json({ msg: 'Already applied' });
+    res.status(500).json({ msg: 'Server error while applying' });
   }
-
-  const app = await Application.create({ userId: req.user.id, jobId });
-  res.json(app);
 };
 
 

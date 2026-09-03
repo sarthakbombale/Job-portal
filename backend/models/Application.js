@@ -15,6 +15,15 @@ const applicationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   }
+  ,
+  // Resume metadata (optional)
+  resume: {
+    filename: { type: String },
+    originalName: { type: String },
+    mimeType: { type: String },
+    size: { type: Number },
+    url: { type: String }
+  }
 });
 
 // Enforces one application per user per job

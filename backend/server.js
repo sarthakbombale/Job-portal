@@ -14,6 +14,13 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+const path = require('path');
+const fs = require('fs');
+
+// Make sure uploads folder exists and serve it statically for resume access
+const uploadsPath = path.join(__dirname, 'uploads');
+fs.mkdirSync(uploadsPath, { recursive: true });
+app.use('/uploads', express.static(uploadsPath));
 
 const authRoutes = require("./routes/authRoutes");
 
