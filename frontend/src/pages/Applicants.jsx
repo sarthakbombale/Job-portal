@@ -30,7 +30,7 @@ function Applicants() {
   const fetchApplicants = async () => {
     try {
       const res = await API.get(`/applicants/${jobId}`, {
-        headers: { Authorization: token },
+        headers: { Authorization: `Bearer ${token}` },
       });
       setApplicants(res.data);
     } catch (err) {
@@ -48,6 +48,22 @@ function Applicants() {
   
   // Now toastStyle is NOT a dependency because it's defined inside the effect
 }, [jobId, token]);
+
+  const updateStatus = async (appId, status, message) => {
+    try {
+      await API.put(`/applications/${appId}/status`, { status, message }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('Status updated');
+      // refresh
+      const res = await API.get(`/applicants/${jobId}`, { headers: { Authorization: `Bearer ${token}` } });
+      setApplicants(res.data);
+    } catch (err) {
+      console.error('Status update failed', err.response || err);
+      const msg = err.response?.data?.msg || err.response?.data?.message || `Failed (${err.response?.status || 'network'})`;
+      toast.error(msg);
+    }
+  };
 
   return (
     <motion.div
@@ -103,6 +119,8 @@ function Applicants() {
                   <th className="text-uppercase small p-3">Candidate Name</th>
                   <th className="text-uppercase small p-3">Email Address</th>
                   <th className="text-uppercase small p-3">Applied Date</th>
+                  <th className="text-uppercase small p-3">Status</th>
+                  <th className="text-uppercase small p-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -119,6 +137,22 @@ function Applicants() {
                       {new Date(app.createdAt).toLocaleDateString('en-GB', {
                         day: '2-digit', month: 'short', year: 'numeric'
                       })}
+                    </td>
+                    <td className="p-3">
+                      <span className={`badge ${app.status === 'accepted' ? 'bg-success' : app.status === 'rejected' ? 'bg-danger' : 'bg-secondary'} text-white small`}>{app.status || 'pending'}</span>
+                      {app.resume?.url && (
+                        <div className="mt-1 small">
+                          <a href={app.resume.url} target="_blank" rel="noreferrer">View Resume</a>
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-3">
+                      <div className="d-flex gap-2">
+                        <button className="btn btn-sm btn-success" onClick={async () => { const m = window.prompt('Optional message to include in email (leave blank for none)'); await updateStatus(app._id, 'accepted', m); }}>Accept</button>
+                        <button className="btn btn-sm btn-danger" onClick={async () => { const m = window.prompt('Optional message to include in email (leave blank for none)'); await updateStatus(app._id, 'rejected', m); }}>Reject</button>
+                        <button className="btn btn-sm btn-secondary" onClick={async () => { const m = window.prompt('Optional message to include in email (leave blank for none)'); await updateStatus(app._id, 'pending', m); }}>Set Pending</button>
+                        <button className="btn btn-sm btn-outline-dark" onClick={async () => { const m = window.prompt('Message to send to candidate'); if (m !== null) await updateStatus(app._id, app.status || 'pending', m); }}>Email</button>
+                      </div>
                     </td>
                   </motion.tr>
                 ))}

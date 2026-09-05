@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 jspm_packages/
+npm-install.log
 
 # Environment Variables (CRITICAL for security)
 .env
