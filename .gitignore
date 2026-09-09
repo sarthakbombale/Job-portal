@@ -10,13 +10,17 @@ npm-install.log
 .env.test.local
 .env.production.local
 .env.example
+
+# Documentation files (local reference only, not pushed to GitHub)
+OTP_LOGIN_SYSTEM.md
+OTP_QUICK_SETUP.md
+backend/OTP_LOGIN_SYSTEM.md
+backend/OTP_QUICK_SETUP.md
+
 # Build folders
 dist/
 build/
 out/
-
-OTP_LOGIN_SYSTEM.md
-OTP_QUICK_SETUP.md 
 
 # Debug logs
 npm-debug.log*
