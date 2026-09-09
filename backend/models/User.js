@@ -8,7 +8,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["user", "admin"],
     default: "user"
-  }
-}, { timestamps: true }); // Good practice to track account creation dates
+  },
+  // OTP fields for email verification
+  otp: { type: String, default: null },
+  otpExpiry: { type: Date, default: null },
+  isOtpVerified: { type: Boolean, default: false },
+  lastOtpSent: { type: Date, default: null },
+  loginAttempts: { type: Number, default: 0 },
+  isAccountLocked: { type: Boolean, default: false }
+}, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

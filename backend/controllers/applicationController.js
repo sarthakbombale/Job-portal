@@ -1,6 +1,17 @@
 const Application = require("../models/Application");
 const User = require("../models/User");
 const { sendMail } = require("../utils/mailer");
+const { renderTemplate } = require("../utils/emailTemplate");
+
+// Helper function to format date
+const formatDate = (date) => {
+  if (!date) return 'N/A';
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
 
 // APPLY JOB (CANDIDATE)
 exports.applyJob = async (req, res) => {
@@ -73,7 +84,9 @@ exports.updateStatus = async (req, res) => {
       return res.status(400).json({ msg: 'Invalid status' });
     }
 
-    const app = await Application.findById(appId).populate('userId', 'name email').populate('jobId', 'title');
+    const app = await Application.findById(appId)
+      .populate('userId', 'name email')
+      .populate('jobId', 'title companyName');
     if (!app) return res.status(404).json({ msg: 'Application not found' });
 
     app.status = status;
@@ -83,14 +96,39 @@ exports.updateStatus = async (req, res) => {
     // Send notification email (best-effort)
     const to = app.userId?.email;
     if (to) {
-      const subject = `Your application for ${app.jobId?.title || 'the role'} is ${status}`;
-      const text = `${app.userId.name || 'Candidate'},\n\nYour application status has been updated to: ${status}.\n\n${message || ''}\n\nRegards,\nRecruiter`;
-      const html = `<p>Hi ${app.userId.name || 'Candidate'},</p><p>Your application status has been updated to: <strong>${status}</strong>.</p><p>${message || ''}</p><p>Regards,<br/>Recruiter</p>`;
-
       try {
-        await sendMail({ to, subject, text, html });
+        // Prepare template data
+        const templateData = {
+          candidateName: app.userId.name || 'Candidate',
+          status: status.charAt(0).toUpperCase() + status.slice(1),
+          jobTitle: app.jobId?.title || 'Position',
+          companyName: app.jobId?.companyName || 'Company',
+          appliedDate: formatDate(app.appliedAt),
+          updatedDate: formatDate(app.statusUpdatedAt),
+          customMessage: message || '',
+          dashboardUrl: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/my-applications` : 'http://localhost:5173/my-applications',
+          jobsUrl: process.env.FRONTEND_URL ? `${process.env.FRONTEND_URL}/jobs` : 'http://localhost:5173/jobs',
+          supportEmail: process.env.SUPPORT_EMAIL || 'support@jobportal.com'
+        };
+
+        // Render email template
+        const htmlContent = renderTemplate('applicationStatus', templateData);
+
+        // Prepare subject line
+        const statusMessages = {
+          accepted: `Great news! You're selected for ${app.jobId?.title || 'the position'}`,
+          rejected: `Update on your application for ${app.jobId?.title || 'the position'}`,
+          pending: `Your application for ${app.jobId?.title || 'the position'} is under review`
+        };
+
+        const subject = statusMessages[status] || `Your application status has been updated to ${status}`;
+
+        // Send email
+        await sendMail({ to, subject, html: htmlContent });
+        console.log(`Status email sent to ${to} for application ${appId}`);
       } catch (e) {
         console.error('Failed to send status email:', e);
+        // Don't fail the whole request if email fails
       }
     }
 
