@@ -56,7 +56,7 @@ async function sendMail({ to, subject, text, html, from }) {
     fromAddress = SMTP_USER;
   } else {
     // Last resort
-    fromAddress = 'no-reply@example.com';
+    fromAddress = 'sarthakbomble250@gmail.com';
   }
 
   try {

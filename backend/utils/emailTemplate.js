@@ -507,10 +507,19 @@ const getEmailTemplate = (status) => {
  */
 function renderTemplate(status, data) {
   try {
-    const templateFn = getEmailTemplate(status);
+    const normalizedStatus = String(status || data?.status || 'pending').toLowerCase();
+    const templateStatus = ['accepted', 'rejected', 'pending'].includes(normalizedStatus)
+      ? normalizedStatus
+      : 'pending';
+
+    const templateFn = getEmailTemplate(templateStatus);
     const enrichedData = {
       ...data,
-      statusDisplay: data.status || 'Pending'
+      status: templateStatus,
+      statusDisplay: String(data?.status || templateStatus)
+        .trim()
+        ? String(data?.status || templateStatus).charAt(0).toUpperCase() + String(data?.status || templateStatus).slice(1).toLowerCase()
+        : 'Pending'
     };
     return templateFn(enrichedData);
   } catch (error) {

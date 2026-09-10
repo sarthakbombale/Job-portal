@@ -112,7 +112,7 @@ exports.updateStatus = async (req, res) => {
         };
 
         // Render email template
-        const htmlContent = renderTemplate('applicationStatus', templateData);
+        const htmlContent = renderTemplate(status, templateData);
 
         // Prepare subject line
         const statusMessages = {

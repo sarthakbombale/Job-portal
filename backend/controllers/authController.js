@@ -27,10 +27,10 @@ exports.register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      isOtpVerified: true // Allow login immediately after registration
+      isOtpVerified: false
     });
 
-    res.status(201).json({ msg: "Registered successfully. You can now login." });
+    res.status(201).json({ msg: "Registered successfully. Please login with OTP verification." });
 
   } catch (err) {
     console.log("REGISTER ERROR:", err);
@@ -173,18 +173,9 @@ exports.login = async (req, res) => {
 
     if (!isMatch) return res.status(400).json({ msg: "Invalid password" });
 
-    // DEPRECATED: Old flow without OTP
-    // New flow requires OTP verification first
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET
-    );
-
-    res.json({
-      token,
-      role: user.role,
-      name: user.name,
-      userId: user._id,
+    // Direct login is disabled to enforce OTP verification.
+    return res.status(403).json({
+      msg: "OTP verification is required. Please request an OTP and verify it before logging in."
     });
 
   } catch (err) {
