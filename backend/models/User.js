@@ -9,11 +9,6 @@ const userSchema = new mongoose.Schema({
     enum: ["user", "admin"],
     default: "user"
   },
-  // OTP fields for email verification
-  otp: { type: String, default: null },
-  otpExpiry: { type: Date, default: null },
-  isOtpVerified: { type: Boolean, default: false },
-  lastOtpSent: { type: Date, default: null },
   loginAttempts: { type: Number, default: 0 },
   isAccountLocked: { type: Boolean, default: false }
 }, { timestamps: true });
