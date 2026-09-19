@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
@@ -6,7 +5,7 @@ import { toast } from "react-toastify";
 /* eslint-disable no-unused-vars */
 import { motion, AnimatePresence } from "framer-motion";
 /* eslint-enable no-unused-vars */
-import { Search, CheckCircle2, Building2, Clock, ArrowRight, SlidersHorizontal, X, ChevronLeft, ChevronRight, Briefcase, MapPin } from "lucide-react";
+import { Search, CheckCircle2, Building2, Clock, ArrowRight, SlidersHorizontal, X, ChevronLeft, ChevronRight, Briefcase, MapPin, TrendingUp, Sparkles } from "lucide-react";
 import JobCardSkeleton from "../components/JobCardSkeleton";
 
 function Jobs({ searchTerm }) {
@@ -112,6 +111,12 @@ function Jobs({ searchTerm }) {
 
   const activeFilterCount = selectedFilters.location.length + selectedFilters.experience.length + selectedFilters.salary.length;
 
+  const filterHighlights = [
+    { label: 'Top roles', value: '240+' },
+    { label: 'Remote ready', value: '52%' },
+    { label: 'Avg. response', value: '2 days' }
+  ];
+
   const FilterContent = () => (
     <>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -157,26 +162,48 @@ function Jobs({ searchTerm }) {
 
   return (
     <div className="container pb-5 mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-      <header className="mb-4 mb-md-5 pb-3" style={{ borderBottom: '1px solid #EEF0F3' }}>
-        <div className="d-flex align-items-center gap-2 mb-2">
-          <div className="d-flex align-items-center justify-content-center rounded-3" style={{ width: '34px', height: '34px', background: '#0F172A' }}>
-            <Briefcase size={17} color="#fff" />
+      <header className="job-portal-header mb-4 mb-md-5">
+        <div className="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3 mb-4">
+          <div>
+            <div className="d-flex align-items-center gap-2 mb-3">
+              <div className="d-flex align-items-center justify-content-center rounded-3" style={{ width: '42px', height: '42px', background: 'linear-gradient(135deg, #0f172a, #1d4ed8)' }}>
+                <Briefcase size={18} color="#fff" />
+              </div>
+              <span className="fw-bold text-uppercase text-muted" style={{ fontSize: '11px', letterSpacing: '2px' }}>Careers Hub</span>
+            </div>
+            <h1 className="display-6 fw-black mb-2" style={{ letterSpacing: '-1.2px', lineHeight: 1.05 }}>
+              Discover your <span style={{ color: '#2563EB' }}>next role</span>
+            </h1>
+            <p className="text-muted fw-semibold mb-0 d-flex align-items-center gap-2 flex-wrap">
+              <span>Welcome back, {name}</span>
+              <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#CBD5E1', display: 'inline-block' }} />
+              <span>{filteredJobs.length} roles available</span>
+            </p>
           </div>
-          <span className="fw-bold text-uppercase text-muted" style={{ fontSize: '11px', letterSpacing: '2px' }}>Careers Hub</span>
+
+          <div className="d-flex gap-3 flex-wrap justify-content-lg-end">
+            {filterHighlights.map((item) => (
+              <div key={item.label} className="mini-stat-card">
+                <span>{item.label}</span>
+                <strong>{item.value}</strong>
+              </div>
+            ))}
+          </div>
         </div>
-        <h1 className="display-6 fw-bold text-dark" style={{ letterSpacing: '-1.2px' }}>
-          Explore <span style={{ color: '#2563EB' }}>opportunities</span>
-        </h1>
-        <p className="text-muted fw-semibold small mb-0 d-flex align-items-center gap-2">
-          <span>Welcome back, {name}</span>
-          <span style={{ width: '4px', height: '4px', borderRadius: '50%', background: '#CBD5E1', display: 'inline-block' }} />
-          <span>{filteredJobs.length} roles available</span>
-        </p>
+
+        <div className="d-flex flex-wrap gap-2">
+          {['Fast Hiring', 'Remote Friendly', 'High Growth', 'Product Roles', 'UX Design', 'Data & AI'].map((tag) => (
+            <span key={tag} className="header-chip">
+              <Sparkles size={12} />
+              {tag}
+            </span>
+          ))}
+        </div>
       </header>
 
       <div className="row g-4">
         <div className="col-lg-3 d-none d-lg-block">
-          <div className="card border-0 p-4 sticky-top" style={{ borderRadius: '20px', top: '110px', zIndex: 10, border: '1px solid #ECEFF3', boxShadow: '0 2px 10px rgba(15, 23, 42, 0.04)' }}>
+          <div className="card border-0 p-4 sticky-top" style={{ borderRadius: '22px', top: '110px', zIndex: 10, border: '1px solid #ECEFF3', boxShadow: '0 18px 35px rgba(15, 23, 42, 0.05)', background: '#fff' }}>
             <FilterContent />
           </div>
         </div>
@@ -210,12 +237,12 @@ function Jobs({ searchTerm }) {
                               navigate(`/job/${jobId}`);
                             }}
                             className="card border-0 p-4 job-card-main standard-shadow h-100"
-                            style={{ cursor: 'pointer', borderRadius: '20px' }}
+                            style={{ cursor: 'pointer', borderRadius: '22px', background: 'linear-gradient(180deg, #ffffff 0%, #f8fbff 100%)' }}
                           >
                             <div className="d-flex justify-content-between align-items-center mb-3">
-                              <div className="d-flex align-items-center gap-2 px-2 py-1 rounded-pill" style={{ fontSize: '10px', background: '#F1F5F9' }}>
-                                <Clock size={12} style={{ color: '#64748B' }} />
-                                <span className="fw-bold text-uppercase" style={{ color: '#475569', letterSpacing: '0.3px' }}>
+                              <div className="d-flex align-items-center gap-2 px-2 py-1 rounded-pill" style={{ fontSize: '10px', background: '#EAF2FF' }}>
+                                <Clock size={12} style={{ color: '#2563EB' }} />
+                                <span className="fw-bold text-uppercase" style={{ color: '#1D4ED8', letterSpacing: '0.3px' }}>
                                   {job.createdAt ? getRelativeTime(job.createdAt) : "JUST NOW"}
                                 </span>
                               </div>
@@ -223,7 +250,7 @@ function Jobs({ searchTerm }) {
                             </div>
 
                             <div className="mb-4 d-flex align-items-center gap-3">
-                              <div className="d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '56px', height: '56px', borderRadius: '14px', background: '#F8FAFC', border: '1px solid #EEF0F3' }}>
+                              <div className="d-flex align-items-center justify-content-center flex-shrink-0" style={{ width: '58px', height: '58px', borderRadius: '16px', background: '#F8FAFC', border: '1px solid #EEF0F3', overflow: 'hidden' }}>
                                 {job.companyLogo ? (
                                   <img src={job.companyLogo} alt="logo" style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain' }} />
                                 ) : (
@@ -255,7 +282,7 @@ function Jobs({ searchTerm }) {
                               <div className="flex-fill p-2 rounded-3 text-center" style={{ background: 'linear-gradient(135deg, #1E293B, #0F172A)' }}>
                                 <div className="fw-bold text-white" style={{ fontSize: '11px' }}>{job.salary}</div>
                               </div>
-                              <div className="flex-fill p-2 rounded-3 text-center" style={{ border: '1.5px solid #E2E8F0' }}>
+                              <div className="flex-fill p-2 rounded-3 text-center" style={{ border: '1.5px solid #E2E8F0', background: '#fff' }}>
                                 <div className="fw-bold" style={{ fontSize: '11px', color: '#334155' }}>{job.experience}</div>
                               </div>
                             </div>
@@ -270,7 +297,7 @@ function Jobs({ searchTerm }) {
                                 style={{ fontSize: '12.5px', letterSpacing: '0.3px' }}>
                                 {job.isApplied ? "Applied" : "Quick Apply"}
                               </button>
-                              <div className="d-flex align-items-center justify-content-center rounded-circle" style={{ width: '32px', height: '32px', background: '#F1F5F9' }}>
+                              <div className="d-flex align-items-center justify-content-center rounded-circle" style={{ width: '34px', height: '34px', background: '#F1F5F9' }}>
                                 <ArrowRight size={16} style={{ color: '#334155' }} />
                               </div>
                             </div>
@@ -345,12 +372,61 @@ function Jobs({ searchTerm }) {
       </AnimatePresence>
 
       <style>{`
+        .job-portal-header {
+          padding: 1.5rem 1.4rem 1rem;
+          border: 1px solid rgba(148, 163, 184, 0.2);
+          border-radius: 26px;
+          background: linear-gradient(135deg, rgba(255,255,255,0.88), rgba(239,246,255,0.92));
+          box-shadow: 0 18px 35px rgba(15, 23, 42, 0.04);
+        }
+
+        .mini-stat-card {
+          min-width: 120px;
+          padding: 0.8rem 1rem;
+          border-radius: 16px;
+          background: rgba(255,255,255,0.85);
+          border: 1px solid rgba(148, 163, 184, 0.18);
+          display: flex;
+          flex-direction: column;
+          gap: 0.2rem;
+          box-shadow: 0 10px 20px rgba(15,23,42,0.03);
+        }
+
+        .mini-stat-card span {
+          font-size: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          color: #64748b;
+          font-weight: 700;
+        }
+
+        .mini-stat-card strong {
+          font-size: 1.1rem;
+          font-weight: 800;
+          color: #0f172a;
+        }
+
+        .header-chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.35rem;
+          background: #ffffff;
+          border: 1px solid rgba(148, 163, 184, 0.25);
+          color: #334155;
+          padding: 0.45rem 0.8rem;
+          border-radius: 999px;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 10px; }
         .job-card-main { transition: all 0.25s ease; border: 1px solid #EEF0F3 !important; background: #ffffff; }
-        .job-card-main:hover { transform: translateY(-4px); border-color: #0F172A !important; box-shadow: 0 14px 30px rgba(15, 23, 42, 0.09) !important; }
-        .standard-shadow { box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05); }
-        .skill-pill { background: #F1F5F9; color: #334155; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+        .job-card-main:hover { transform: translateY(-4px); border-color: #0F172A !important; box-shadow: 0 18px 30px rgba(15, 23, 42, 0.09) !important; }
+        .standard-shadow { box-shadow: 0 14px 28px rgba(15, 23, 42, 0.05); }
+        .skill-pill { background: #F1F5F9; color: #334155; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
         .fw-black { font-weight: 900; }
         .form-check-input:checked { background-color: #2563EB; border-color: #2563EB; }
         .form-check-input:focus { box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); border-color: #2563EB; }
