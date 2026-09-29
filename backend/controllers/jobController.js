@@ -1,6 +1,8 @@
 const Job = require("../models/Job");
 const Application = require("../models/Application"); // Import Application model
 const jwt = require("jsonwebtoken");
+const { clearCache } = require("../utils/cache");
+const { invalidateCache } = require("../middleware/cacheMiddleware");
 
 // CREATE JOB (ADMIN) - Corrected to include all fields
 exports.createJob = async (req, res) => {
@@ -28,6 +30,9 @@ exports.createJob = async (req, res) => {
       companyLogo,
       createdBy: req.user.id
     });
+
+    // Invalidate jobs list cache when new job is created
+    invalidateCache("jobs");
 
     res.status(201).json(job);
   } catch (err) {
@@ -82,15 +87,26 @@ exports.updateJob = async (req, res) => {
       { new: true }
     );
     if (!updatedJob) return res.status(404).json({ message: "Job not found" });
+    
+    // Invalidate relevant caches
+    invalidateCache("jobs");
+    invalidateCache(req.params.id);
+    
     res.json(updatedJob);
   } catch (error) {
     res.status(500).json({ message: "Server Error during update" });
   }
 };
+
 // DELETE JOB
 exports.deleteJob = async (req, res) => {
   try {
     await Job.findByIdAndDelete(req.params.id);
+    
+    // Invalidate relevant caches
+    invalidateCache("jobs");
+    invalidateCache(req.params.id);
+    
     res.json({ msg: "Job deleted" });
   } catch (err) {
     res.status(500).json({ msg: "Error deleting job" });

@@ -1,21 +1,27 @@
-import React from "react";
+import React, { memo, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 /* eslint-disable no-unused-vars */
 import { motion } from "framer-motion";
 import { Search, LogOut, Briefcase, History, LayoutDashboard } from "lucide-react";
 
-function Navbar({ searchTerm, setSearchTerm }) {
+const Navbar = memo(function Navbar({ searchTerm, setSearchTerm }) {
   const navigate = useNavigate();
   const location = useLocation();
   const role = localStorage.getItem("role");
   const token = localStorage.getItem("token");
 
-  const handleLogout = () => {
+  // Memoize logout handler
+  const handleLogout = useCallback(() => {
     localStorage.clear();
     navigate("/");
     toast.info("Logged Out Successfully");
-  };
+  }, [navigate]);
+
+  // Memoize search handler
+  const handleSearchChange = useCallback((e) => {
+    setSearchTerm(e.target.value);
+  }, [setSearchTerm]);
 
   if (!token || ["/", "/register"].includes(location.pathname)) return null;
 
@@ -49,7 +55,7 @@ function Navbar({ searchTerm, setSearchTerm }) {
                   className="form-control shadow-none border-0 bg-light search-input-responsive"
                   placeholder="Search..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={handleSearchChange}
                 />
               </div>
             </div>
@@ -149,9 +155,11 @@ function Navbar({ searchTerm, setSearchTerm }) {
       `}</style>
     </motion.nav>
   );
-}
+}, (prevProps, nextProps) => {
+  return prevProps.searchTerm === nextProps.searchTerm;
+});
 
-function IconNavLink({ to, icon }) {
+const IconNavLink = memo(function IconNavLink({ to, icon }) {
   const location = useLocation();
   const isActive = location.pathname === to;
 
@@ -160,6 +168,6 @@ function IconNavLink({ to, icon }) {
       {icon}
     </Link>
   );
-}
+});
 
 export default Navbar;
