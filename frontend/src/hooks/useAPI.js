@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import API from './api';
+import API from '../api';
 
 /**
  * Hook to fetch all jobs with caching
  */
 export const useJobs = (token) => {
   return useQuery({
-    queryKey: ['jobs'],
+    queryKey: ['jobs', token ?? 'anonymous'],
     queryFn: async () => {
       const res = await API.get('/jobs', { 
         headers: { Authorization: token } 
@@ -23,7 +23,7 @@ export const useJobs = (token) => {
  */
 export const useJobById = (id, token) => {
   return useQuery({
-    queryKey: ['job', id],
+    queryKey: ['job', id, token ?? 'anonymous'],
     queryFn: async () => {
       const res = await API.get(`/jobs/${id}`, { 
         headers: { Authorization: token } 
@@ -48,10 +48,10 @@ export const useApplyJob = () => {
       });
       return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       // Invalidate and refetch jobs list and applications
-      queryClient.invalidateQueries({ queryKey: ['jobs'] });
-      queryClient.invalidateQueries({ queryKey: ['applications'] });
+      queryClient.invalidateQueries({ queryKey: ['jobs', variables?.token ?? 'anonymous'] });
+      queryClient.invalidateQueries({ queryKey: ['applications', variables?.token ?? 'anonymous'] });
     },
   });
 };
@@ -61,7 +61,7 @@ export const useApplyJob = () => {
  */
 export const useApplications = (token) => {
   return useQuery({
-    queryKey: ['applications'],
+    queryKey: ['applications', token ?? 'anonymous'],
     queryFn: async () => {
       const res = await API.get('/applications', { 
         headers: { Authorization: token } 
@@ -78,7 +78,7 @@ export const useApplications = (token) => {
  */
 export const useApplicants = (jobId, token) => {
   return useQuery({
-    queryKey: ['applicants', jobId],
+    queryKey: ['applicants', jobId, token ?? 'anonymous'],
     queryFn: async () => {
       const res = await API.get(`/applicants/${jobId}`, { 
         headers: { Authorization: token } 
@@ -104,9 +104,9 @@ export const useUpdateApplicationStatus = () => {
       );
       return res.data;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       // Invalidate applicants cache
-      queryClient.invalidateQueries({ queryKey: ['applicants'] });
+      queryClient.invalidateQueries({ queryKey: ['applicants', variables?.jobId ?? 'unknown'] });
     },
   });
 };
@@ -116,7 +116,7 @@ export const useUpdateApplicationStatus = () => {
  */
 export const useJobStats = (token) => {
   return useQuery({
-    queryKey: ['jobStats'],
+    queryKey: ['jobStats', token ?? 'anonymous'],
     queryFn: async () => {
       const res = await API.get('/jobs', { 
         headers: { Authorization: token } 
